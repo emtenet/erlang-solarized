@@ -1,0 +1,182 @@
+= solarized module
+
+The `solarized` module contains the following:
+
+* <<style>>
+** `solarized:directive()`
+* <<color>>
+** `solarized:color()`
+* <<output>>
+** `solarized:output/1`
+* <<simple>>
+** `solarized:Color/1`
+** `solarized:Color/2`
+** `solarized:Color/3`
+* <<utilities>>
+** <<columns>>
+** <<rows>>
+** <<nl>>
+
+[#style]
+== Style directives
+
+A style is made up of five components:
+
+* it's `color()` (<<color>>),
+* a `bold` toggle,
+* a `highlight` toggle,
+* a `reverse` toggle,
+* and an `underline` toggle.
+
+A style can have any of it's five components changed with the following
+directives:
+
+[source,erlang]
+----
+-type solarized:directive() ::
+    color() |
+    bold | bold_off |
+    highlight | highlight_off |
+    reverse | reverse_off |
+    underline | underline_off.
+----
+
+[#color]
+== Colors
+
+A style's color can be one of:
+
+[source,erlang]
+----
+-type solarized:color() ::
+    text |
+    comment |
+    emphasize |
+    blue |
+    cyan |
+    green |
+    magenta |
+    orange |
+    red |
+    violet |
+    yellow.
+----
+
+[#output]
+== Styled output
+
+Styled text can be output to the console with:
+
+[source,erlang]
+----
+-spec solarized:output(Text) -> ok
+    when
+      Text :: solarized:styled().
+----
+
+where `solarized:styled()` is an extension of `unicode:chardata()` that
+contains directives applied to text in the form:
+
+[source,erlang]
+----
+-type solarized:applied() ::
+    {Apply :: directive(), Text :: styled()} |
+    {Apply1 :: directive(), Apply2 :: directive(), Text :: styled()}.
+----
+
+and is fully defined as:
+
+[source,erlang]
+----
+-type solarized:styled() ::
+    unicode_binary() |
+    applied() |
+    maybe_improper_list(unicode_char() | styled(),
+                        unicode_binary() | applied() | []).
+-type unicode_char() :: char().
+-type unicode_binary() :: unicode:unicode_binary().
+----
+
+[#simple]
+== Simple output
+
+When output is of only one style it can be output with shortcuts named for
+each of the colors.
+These shortcuts have an interface similar to `io:put_chars/1` and `io:format/2`.
+
+[source,erlang]
+----
+-spec solarized:Color(Text) -> ok
+    when
+      Color :: solarized:color(),
+      Text :: unicode:chardata().
+
+Color(Text) ->
+    output({Color, Text}).
+
+-spec solarized:Color(Format, Data) -> ok when
+      Color :: solarized:color(),
+      Format :: io:format(),
+      Data :: [term()].
+
+Color(Format, Data) ->
+    output({Color, io_lib:format(Format, Data)}).
+
+-spec solarized:Color(Apply, Text) -> ok
+    when
+      Color :: solarized:color(),
+      Apply :: solarized:directive(),
+      Text :: unicode:chardata().
+
+Color(Directive, Text) ->
+    output({Color, Apply, Text}).
+
+-spec solarized:Color(Apply, Format, Data) -> ok when
+      Color :: solarized:color(),
+      Apply :: solarized:directive(),
+      Format :: io:format(),
+      Data :: [term()].
+
+Color(Apply, Format, Data) ->
+    output({Color, Apply, io_lib:format(Format, Data)}).
+----
+
+[#utilities]
+== Utilities
+
+[#columns]
+=== `solarized:columns()`
+
+[source,erlang]
+----
+-spec solarized:columns() -> Columns
+    when
+      Columns :: integer() > 1.
+----
+
+This is a wrapper around `io:columns()` that returns a default of `80` when
+the underlying call is unsupported.
+
+[#rows]
+=== `solarized:rows()`
+
+[source,erlang]
+----
+-spec solarized:rows() -> Rows
+    when
+      Rows :: integer() > 1.
+----
+
+This is a wrapper around `io:rows()` that returns a default of `25` when
+the underlying call is unsupported.
+
+[#nl]
+=== `solarized:nl()`
+
+[source,erlang]
+----
+-spec solarized:nl() -> ok.
+----
+
+This is an alias for `io:nl()`.
+

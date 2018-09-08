@@ -1,0 +1,40 @@
+= solarized-erlang: Output in a solarized terminal
+
+*solarized-erlang* is an http://www.erlang.org/[Erlang library]
+with tools to produce output in a
+https://ethanschoonover.com/solarized/[solarized] terminal.
+
+solarized-erlang is distributed under the terms of the *ISC Licence*;
+see link:LICENSE[`LICENSE`].
+
+== Documentation
+
+* link:doc/solarized.adoc[`solarized`] module.
+
+== Usage with erlang.mk
+
+.Makefile
+----
+DEPS = solarized
+dep_solarized = git https://github.com/emtenet/solarized-erlang master
+----
+
+== Solarized terminal
+
+This library currently assumes a terminal appropriately setup for dark
+solarized as follows:
+
+* the terminal supports 24-bit colors
+* the following ANSI escapes:
+** reset:
+   `_escape_ *[* *0* *m*`
+** set foreground color:
+   `_escape_ *[* *38* *;* *2* *;* _red_ *;* _green_ *;* _blue_ *m*`
+** set background color:
+   `_escape_ *[* *48* *;* *2* *;* _red_ *;* _green_ *;* _blue_ *m*`
+** bold on: `_escape_ *[* *1* *m*` and off: `_escape_ *[* *21* *m*`
+** reverse on: `_escape_ *[* *7* *m*` and off: `_escape_ *[* *27* *m*`
+** underline on: `_escape_ *[* *4* *m*` and off: `_escape_ *[* *24* *m*`
+* default foreground color: *base0* `#808080`
+* default background color: *base03* `#1c1c1c`
+
