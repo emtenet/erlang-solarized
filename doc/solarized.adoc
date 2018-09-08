@@ -114,7 +114,8 @@ These shortcuts have an interface similar to `io:put_chars/1` and `io:format/2`.
 Color(Text) ->
     output({Color, Text}).
 
--spec solarized:Color(Format, Data) -> ok when
+-spec solarized:Color(Format, Data) -> ok
+    when
       Color :: solarized:color(),
       Format :: io:format(),
       Data :: [term()].
@@ -128,10 +129,11 @@ Color(Format, Data) ->
       Apply :: solarized:directive(),
       Text :: unicode:chardata().
 
-Color(Directive, Text) ->
+Color(Apply, Text) ->
     output({Color, Apply, Text}).
 
--spec solarized:Color(Apply, Format, Data) -> ok when
+-spec solarized:Color(Apply, Format, Data) -> ok
+    when
       Color :: solarized:color(),
       Apply :: solarized:directive(),
       Format :: io:format(),
@@ -151,7 +153,7 @@ Color(Apply, Format, Data) ->
 ----
 -spec solarized:columns() -> Columns
     when
-      Columns :: integer() > 1.
+      Columns :: pos_integer().
 ----
 
 This is a wrapper around `io:columns()` that returns a default of `80` when
@@ -164,7 +166,7 @@ the underlying call is unsupported.
 ----
 -spec solarized:rows() -> Rows
     when
-      Rows :: integer() > 1.
+      Rows :: pos_integer().
 ----
 
 This is a wrapper around `io:rows()` that returns a default of `25` when
