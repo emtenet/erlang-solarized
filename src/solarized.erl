@@ -19,13 +19,13 @@
         , violet/1, violet/2, violet/3
         , yellow/1, yellow/2, yellow/3
         , columns/0
-	, rows/0
-	, nl/0
+        , rows/0
+        , nl/0
         ]).
 
 -export_type([ color/0
              , directive/0
-	     , styled/0
+             , styled/0
              ]).
 
 %=======================================================================
@@ -87,13 +87,13 @@
 -ifdef(EUNIT).
 
 -define(outputEqual(Expect, Expression),
-        ?assertEqual((Expect), 
+        ?assertEqual((Expect),
                      solarized_capture:output(fun () -> (Expression) end))).
 -define(_outputEqual(Expect, Expression),
         ?_test(?outputEqual(Expect, Expression))).
 
 -define(resultEqual(Expect, Expression, Columns, Rows),
-        ?assertEqual((Expect), 
+        ?assertEqual((Expect),
                      element(1, solarized_capture:result_and_output(
                                   fun () -> (Expression) end,
                                   (Columns),
