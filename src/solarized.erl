@@ -84,6 +84,27 @@
 
 %=======================================================================
 
+-ifdef(EUNIT).
+
+-define(outputEqual(Expect, Expression),
+        ?assertEqual((Expect), 
+                     solarized_capture:output(fun () -> (Expression) end))).
+-define(_outputEqual(Expect, Expression),
+        ?_test(?outputEqual(Expect, Expression))).
+
+-define(resultEqual(Expect, Expression, Columns, Rows),
+        ?assertEqual((Expect), 
+                     element(1, solarized_capture:result_and_output(
+                                  fun () -> (Expression) end,
+                                  (Columns),
+                                  (Rows))))).
+-define(_resultEqual(Expect, Expression, Columns, Rows),
+        ?_test(?resultEqual(Expect, Expression, Columns, Rows))).
+
+-endif.
+
+%=======================================================================
+
 -spec solarized:output(Text) -> ok
     when
       Text :: solarized:styled().
@@ -574,6 +595,15 @@ columns() ->
             80
     end.
 
+-ifdef(EUNIT).
+
+columns_test_() ->
+    [ ?_resultEqual(40, solarized:columns(), 40, enotsup)
+    , ?_resultEqual(80, solarized:columns(), enotsup, 12)
+    ].
+
+-endif.
+
 %=======================================================================
 
 -spec solarized:rows() -> Rows
@@ -589,6 +619,15 @@ rows() ->
             25
     end.
 
+-ifdef(EUNIT).
+
+rows_test_() ->
+    [ ?_resultEqual(12, solarized:rows(), enotsup, 12)
+    , ?_resultEqual(25, solarized:rows(), 40, enotsup)
+    ].
+
+-endif.
+
 %=======================================================================
 
 -spec solarized:nl() -> ok.
@@ -596,4 +635,11 @@ rows() ->
 nl() ->
     io:nl().
 
+-ifdef(EUNIT).
+
+nl_test() ->
+    Expect = <<$\n>>,
+    ?outputEqual(Expect, solarized:nl()).
+
+-endif.
 
