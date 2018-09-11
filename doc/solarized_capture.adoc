@@ -1,0 +1,90 @@
+= `solarized_capture` module
+
+The `solarized_capture` mocks and captures output for use in tests.
+
+== `solarized_capture:output(Test)`
+
+Pass your test function to `output/1` for its output to be captured.
+
+[source,erlang]
+----
+-spec solarized_capture:output(Test) -> Output
+    when
+      Test :: fun(() -> term()),
+      Output :: binary().
+----
+
+== `solarized_capture:output(Test, Columns, Rows)`
+
+If you want to mock `io:columns/0` and `io:rows/0`
+then pass your `geometry()` to `output/3`.
+
+[source,erlang]
+----
+-spec solarized_capture:output(Test, Columns, Rows) -> Output
+    when
+      Test :: fun(() -> term()),
+      Columns :: geometry(),
+      Rows :: geometry(),
+      Output :: binary().
+----
+
+with `geometry()` defined as:
+
+[source,erlang]
+----
+-type geometry() ::
+      pos_integer()
+    | {ok, pos_integer()}
+    | enotsup
+    | {error, enotsup}.
+----
+
+NOTE: `geometry()` is compatible with
+the return type of `io:columns/0` and `io:rows/0`
+so they can be used as a source of defaults.
+
+== `solarized_capture:result_and_output(Test)`
+
+If you want the `Test` function's result and output use `result_and_output/1`.
+
+[source,erlang]
+----
+-spec solarized_capture:result_and_output(Test) -> {Result, Output}
+    when
+      Test :: fun(() -> Result),
+      Result :: term(),
+      Output :: binary().
+----
+
+== `solarized_capture:result_and_output(Test, Columns, Rows)`
+
+All above options are available together in `result_and_output/3`.
+
+[source,erlang]
+----
+-spec solarized_capture:result_and_output(Test, Columns, Rows) -> {Result, Output}
+    when
+      Test :: fun(() -> Result),
+      Result :: term(),
+      Columns :: geometry(),
+      Rows :: geometry(),
+      Output :: binary().
+----
+
+== References
+
+This module replaces the group leader to capture output.
+
+See: http://erlang.org/doc/apps/stdlib/io_protocol.html
+
+== Thanks
+
+This module has been derived from
+https://github.com/marco-m/mock_io
+(Copyright (c) 2015, Marco Molteni).
+
+Support was added for the mocking of `io:columns()` and `io:rows()`.
+
+Mocking of input was lost to gain a simplification of the API as a single call.
+

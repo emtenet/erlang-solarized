@@ -1,4 +1,4 @@
-= solarized-erlang: Output in a solarized terminal
+= solarized-erlang: Output and testing in a solarized terminal
 
 *solarized-erlang* is an http://www.erlang.org/[Erlang library]
 with tools to produce output in a
@@ -10,6 +10,12 @@ see link:LICENSE[`LICENSE`].
 == Documentation
 
 * link:doc/solarized.adoc[`solarized`] module.
++
+Output styled text.
+
+* link:doc/solarized_capture.adoc[`solarized_capture`] module.
++
+Mock and capture output (including rows and columns) for use in tests.
 
 == Usage with erlang.mk
 
