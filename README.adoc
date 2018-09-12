@@ -36,11 +36,15 @@ solarized as follows:
    `_escape_ *[* *0* *m*`
 ** set foreground color:
    `_escape_ *[* *38* *;* *2* *;* _red_ *;* _green_ *;* _blue_ *m*`
+** set default foreground color:
+   `_escape_ *[* *39* *m*`
 ** set background color:
    `_escape_ *[* *48* *;* *2* *;* _red_ *;* _green_ *;* _blue_ *m*`
+** set default background color:
+   `_escape_ *[* *49* *m*`
 ** bold on: `_escape_ *[* *1* *m*` and off: `_escape_ *[* *21* *m*`
 ** reverse on: `_escape_ *[* *7* *m*` and off: `_escape_ *[* *27* *m*`
 ** underline on: `_escape_ *[* *4* *m*` and off: `_escape_ *[* *24* *m*`
-* default foreground color: *base0* `#808080`
-* default background color: *base03* `#1c1c1c`
+* default foreground color: *base0* `rgb(131, 148, 150)`
+* default background color: *base03* `rgb(0, 43, 54)`
 
