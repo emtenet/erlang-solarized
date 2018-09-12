@@ -6,8 +6,8 @@ The `solarized` module contains the following:
 ** `solarized:directive()`
 * <<color>>
 ** `solarized:color()`
-* <<output>>
-** `solarized:output/1`
+* <<styled>>
+** `solarized:styled/1`
 * <<simple>>
 ** `solarized:Color/1`
 ** `solarized:Color/2`
@@ -62,14 +62,14 @@ A style's color can be one of:
     yellow.
 ----
 
-[#output]
+[#styled]
 == Styled output
 
 Styled text can be output to the console with:
 
 [source,erlang]
 ----
--spec solarized:output(Text) -> ok
+-spec solarized:styled(Text) -> ok
     when
       Text :: solarized:styled().
 ----
@@ -112,7 +112,7 @@ These shortcuts have an interface similar to `io:put_chars/1` and `io:format/2`.
       Text :: unicode:chardata().
 
 Color(Text) ->
-    output({Color, Text}).
+    styled({Color, Text}).
 
 -spec solarized:Color(Format, Data) -> ok
     when
@@ -121,7 +121,7 @@ Color(Text) ->
       Data :: [term()].
 
 Color(Format, Data) ->
-    output({Color, io_lib:format(Format, Data)}).
+    styled({Color, io_lib:format(Format, Data)}).
 
 -spec solarized:Color(Apply, Text) -> ok
     when
@@ -130,7 +130,7 @@ Color(Format, Data) ->
       Text :: unicode:chardata().
 
 Color(Apply, Text) ->
-    output({Color, Apply, Text}).
+    styled({Color, Apply, Text}).
 
 -spec solarized:Color(Apply, Format, Data) -> ok
     when
@@ -140,7 +140,7 @@ Color(Apply, Text) ->
       Data :: [term()].
 
 Color(Apply, Format, Data) ->
-    output({Color, Apply, io_lib:format(Format, Data)}).
+    styled({Color, Apply, io_lib:format(Format, Data)}).
 ----
 
 [#utilities]

@@ -4,12 +4,10 @@
 -module(solarized).
 -include_lib("eunit/include/eunit.hrl").
 
--export([ output/1
+-export([ styled/1
         , text/1, text/2, text/3
         , comment/1, comment/2, comment/3
         , emphasize/1, emphasize/2, emphasize/3
-        , underline/1, underline/2, underline/3
-        , highlight/1, highlight/2, highlight/3
         , blue/1, blue/2, blue/3
         , cyan/1, cyan/2, cyan/3
         , green/1, green/2, green/3
@@ -105,11 +103,11 @@
 
 %=======================================================================
 
--spec solarized:output(Text) -> ok
+-spec solarized:styled(Text) -> ok
     when
       Text :: solarized:styled().
 
-output(_Text) ->
+styled(_Text) ->
     ok.
 
 %=======================================================================
@@ -119,7 +117,7 @@ output(_Text) ->
       Text :: unicode:chardata().
 
 text(Text) ->
-    output({text, Text}).
+    styled({text, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -133,9 +131,9 @@ text(Text) ->
       Text :: unicode:chardata().
 
 text(Apply, Text) when is_atom(Apply) ->
-    output({text, Apply, Text});
+    styled({text, Apply, Text});
 text(Format, Data) ->
-    output({text, io_lib:format(Format, Data)}).
+    styled({text, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -146,7 +144,7 @@ text(Format, Data) ->
       Data :: [term()].
 
 text(Apply, Format, Data) when is_atom(Apply) ->
-    output({text, Apply, io_lib:format(Format, Data)}).
+    styled({text, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -155,7 +153,7 @@ text(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 comment(Text) ->
-    output({comment, Text}).
+    styled({comment, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -169,9 +167,9 @@ comment(Text) ->
       Text :: unicode:chardata().
 
 comment(Apply, Text) when is_atom(Apply) ->
-    output({comment, Apply, Text});
+    styled({comment, Apply, Text});
 comment(Format, Data) ->
-    output({comment, io_lib:format(Format, Data)}).
+    styled({comment, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -182,7 +180,7 @@ comment(Format, Data) ->
       Data :: [term()].
 
 comment(Apply, Format, Data) when is_atom(Apply) ->
-    output({comment, Apply, io_lib:format(Format, Data)}).
+    styled({comment, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -191,7 +189,7 @@ comment(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 emphasize(Text) ->
-    output({emphasize, Text}).
+    styled({emphasize, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -205,9 +203,9 @@ emphasize(Text) ->
       Text :: unicode:chardata().
 
 emphasize(Apply, Text) when is_atom(Apply) ->
-    output({emphasize, Apply, Text});
+    styled({emphasize, Apply, Text});
 emphasize(Format, Data) ->
-    output({emphasize, io_lib:format(Format, Data)}).
+    styled({emphasize, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -218,79 +216,7 @@ emphasize(Format, Data) ->
       Data :: [term()].
 
 emphasize(Apply, Format, Data) when is_atom(Apply) ->
-    output({emphasize, Apply, io_lib:format(Format, Data)}).
-
-%=======================================================================
-
--spec underline(Text) -> ok
-    when
-      Text :: unicode:chardata().
-
-underline(Text) ->
-    output({underline, Text}).
-
-%-----------------------------------------------------------------------
-
--spec underline(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;        (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-underline(Apply, Text) when is_atom(Apply) ->
-    output({underline, Apply, Text});
-underline(Format, Data) ->
-    output({underline, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec underline(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-underline(Apply, Format, Data) when is_atom(Apply) ->
-    output({underline, Apply, io_lib:format(Format, Data)}).
-
-%=======================================================================
-
--spec highlight(Text) -> ok
-    when
-      Text :: unicode:chardata().
-
-highlight(Text) ->
-    output({highlight, Text}).
-
-%-----------------------------------------------------------------------
-
--spec highlight(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;        (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-highlight(Apply, Text) when is_atom(Apply) ->
-    output({highlight, Apply, Text});
-highlight(Format, Data) ->
-    output({highlight, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec highlight(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-highlight(Apply, Format, Data) when is_atom(Apply) ->
-    output({highlight, Apply, io_lib:format(Format, Data)}).
+    styled({emphasize, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -299,7 +225,7 @@ highlight(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 blue(Text) ->
-    output({blue, Text}).
+    styled({blue, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -313,9 +239,9 @@ blue(Text) ->
       Text :: unicode:chardata().
 
 blue(Apply, Text) when is_atom(Apply) ->
-    output({blue, Apply, Text});
+    styled({blue, Apply, Text});
 blue(Format, Data) ->
-    output({blue, io_lib:format(Format, Data)}).
+    styled({blue, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -326,7 +252,7 @@ blue(Format, Data) ->
       Data :: [term()].
 
 blue(Apply, Format, Data) when is_atom(Apply) ->
-    output({blue, Apply, io_lib:format(Format, Data)}).
+    styled({blue, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -335,7 +261,7 @@ blue(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 cyan(Text) ->
-    output({cyan, Text}).
+    styled({cyan, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -349,9 +275,9 @@ cyan(Text) ->
       Text :: unicode:chardata().
 
 cyan(Apply, Text) when is_atom(Apply) ->
-    output({cyan, Apply, Text});
+    styled({cyan, Apply, Text});
 cyan(Format, Data) ->
-    output({cyan, io_lib:format(Format, Data)}).
+    styled({cyan, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -362,7 +288,7 @@ cyan(Format, Data) ->
       Data :: [term()].
 
 cyan(Apply, Format, Data) when is_atom(Apply) ->
-    output({cyan, Apply, io_lib:format(Format, Data)}).
+    styled({cyan, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -371,7 +297,7 @@ cyan(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 green(Text) ->
-    output({green, Text}).
+    styled({green, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -385,9 +311,9 @@ green(Text) ->
       Text :: unicode:chardata().
 
 green(Apply, Text) when is_atom(Apply) ->
-    output({green, Apply, Text});
+    styled({green, Apply, Text});
 green(Format, Data) ->
-    output({green, io_lib:format(Format, Data)}).
+    styled({green, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -398,7 +324,7 @@ green(Format, Data) ->
       Data :: [term()].
 
 green(Apply, Format, Data) when is_atom(Apply) ->
-    output({green, Apply, io_lib:format(Format, Data)}).
+    styled({green, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -407,7 +333,7 @@ green(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 magenta(Text) ->
-    output({magenta, Text}).
+    styled({magenta, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -421,9 +347,9 @@ magenta(Text) ->
       Text :: unicode:chardata().
 
 magenta(Apply, Text) when is_atom(Apply) ->
-    output({magenta, Apply, Text});
+    styled({magenta, Apply, Text});
 magenta(Format, Data) ->
-    output({magenta, io_lib:format(Format, Data)}).
+    styled({magenta, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -434,7 +360,7 @@ magenta(Format, Data) ->
       Data :: [term()].
 
 magenta(Apply, Format, Data) when is_atom(Apply) ->
-    output({magenta, Apply, io_lib:format(Format, Data)}).
+    styled({magenta, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -443,7 +369,7 @@ magenta(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 orange(Text) ->
-    output({orange, Text}).
+    styled({orange, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -457,9 +383,9 @@ orange(Text) ->
       Text :: unicode:chardata().
 
 orange(Apply, Text) when is_atom(Apply) ->
-    output({orange, Apply, Text});
+    styled({orange, Apply, Text});
 orange(Format, Data) ->
-    output({orange, io_lib:format(Format, Data)}).
+    styled({orange, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -470,7 +396,7 @@ orange(Format, Data) ->
       Data :: [term()].
 
 orange(Apply, Format, Data) when is_atom(Apply) ->
-    output({orange, Apply, io_lib:format(Format, Data)}).
+    styled({orange, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -479,7 +405,7 @@ orange(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 red(Text) ->
-    output({red, Text}).
+    styled({red, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -493,9 +419,9 @@ red(Text) ->
       Text :: unicode:chardata().
 
 red(Apply, Text) when is_atom(Apply) ->
-    output({red, Apply, Text});
+    styled({red, Apply, Text});
 red(Format, Data) ->
-    output({red, io_lib:format(Format, Data)}).
+    styled({red, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -506,7 +432,7 @@ red(Format, Data) ->
       Data :: [term()].
 
 red(Apply, Format, Data) when is_atom(Apply) ->
-    output({red, Apply, io_lib:format(Format, Data)}).
+    styled({red, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -515,7 +441,7 @@ red(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 violet(Text) ->
-    output({violet, Text}).
+    styled({violet, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -529,9 +455,9 @@ violet(Text) ->
       Text :: unicode:chardata().
 
 violet(Apply, Text) when is_atom(Apply) ->
-    output({violet, Apply, Text});
+    styled({violet, Apply, Text});
 violet(Format, Data) ->
-    output({violet, io_lib:format(Format, Data)}).
+    styled({violet, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -542,7 +468,7 @@ violet(Format, Data) ->
       Data :: [term()].
 
 violet(Apply, Format, Data) when is_atom(Apply) ->
-    output({violet, Apply, io_lib:format(Format, Data)}).
+    styled({violet, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
@@ -551,7 +477,7 @@ violet(Apply, Format, Data) when is_atom(Apply) ->
       Text :: unicode:chardata().
 
 yellow(Text) ->
-    output({yellow, Text}).
+    styled({yellow, Text}).
 
 %-----------------------------------------------------------------------
 
@@ -565,9 +491,9 @@ yellow(Text) ->
       Text :: unicode:chardata().
 
 yellow(Apply, Text) when is_atom(Apply) ->
-    output({yellow, Apply, Text});
+    styled({yellow, Apply, Text});
 yellow(Format, Data) ->
-    output({yellow, io_lib:format(Format, Data)}).
+    styled({yellow, io_lib:format(Format, Data)}).
 
 %-----------------------------------------------------------------------
 
@@ -578,7 +504,7 @@ yellow(Format, Data) ->
       Data :: [term()].
 
 yellow(Apply, Format, Data) when is_atom(Apply) ->
-    output({yellow, Apply, io_lib:format(Format, Data)}).
+    styled({yellow, Apply, io_lib:format(Format, Data)}).
 
 %=======================================================================
 
