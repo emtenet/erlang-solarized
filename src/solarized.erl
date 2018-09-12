@@ -33,8 +33,6 @@
       text
     | comment
     | emphasize
-    | underline
-    | highlight
     | blue
     | cyan
     | green
