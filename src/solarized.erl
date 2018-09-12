@@ -3,7 +3,7 @@
 %% See LICENSE for licensing information.
 -module(solarized).
 -include_lib("eunit/include/eunit.hrl").
--include_lib("solarized/include/eunit.hrl").
+-include("eunit.hrl").
 
 -export([ styled/1
         , text/1, text/2, text/3
