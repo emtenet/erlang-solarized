@@ -75,7 +75,7 @@ Defined as:
         ?_test(?outputEqual(Expect, Expression, Columns, Rows))).
 ----
 
-== `?outputEqualToFile(App, File, Test[, Columns, Rows]__)`
+== `?outputEqualToFile(App, File, Test__[, Columns, Rows]__)`
 
 When the expected value is large and complex and you are more concerned about
 how it looks rather than how it is encoded, save it as a file in:
@@ -97,7 +97,7 @@ a_test() ->
     Test = fun () ->
         ...
     end,
-    ?assert(?outputEqualToFile(__App__, __File__, Test)).
+    ?assert(?outputEqualToFile(App, File, Test)).
 ----
 
 Where `__App__` is your application `atom()` to be used by `code:lib_dir(__App__, tests)`.
