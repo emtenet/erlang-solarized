@@ -17,6 +17,10 @@ Output styled text.
 +
 Mock and capture output (including rows and columns) for use in tests.
 
+* link:doc/eunit.adoc[`eunit.hrl`] header file.
++
+Useful macros for use in EUnit tests.
+
 == Usage with erlang.mk
 
 .Makefile
@@ -42,7 +46,7 @@ solarized as follows:
    `_escape_ *[* *48* *;* *2* *;* _red_ *;* _green_ *;* _blue_ *m*`
 ** set default background color:
    `_escape_ *[* *49* *m*`
-** bold on: `_escape_ *[* *1* *m*` and off: `_escape_ *[* *21* *m*`
+** bold on: `_escape_ *[* *1* *m*` and off: `_escape_ *[* *22* *m*`
 ** reverse on: `_escape_ *[* *7* *m*` and off: `_escape_ *[* *27* *m*`
 ** underline on: `_escape_ *[* *4* *m*` and off: `_escape_ *[* *24* *m*`
 * default foreground color: *base0* `rgb(131, 148, 150)`

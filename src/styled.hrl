@@ -53,7 +53,7 @@
 %-----------------------------------------------------------------------
 
 -define(BOLD, "1").
--define(BOLD_OFF, "21").
+-define(BOLD_OFF, "22").
 -define(REVERSE, "7").
 -define(REVERSE_OFF, "27").
 -define(UNDERLINE, "4").

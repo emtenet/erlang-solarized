@@ -5,26 +5,31 @@
 
 -ifdef(EUNIT).
 
+-define(output(Expression),
+        solarized_capture:output(fun () -> (Expression) end)).
 -define(outputEqual(Expect, Expression),
-        ?assertEqual((Expect),
-                     solarized_capture:output(fun () -> (Expression) end))).
+        ?assertEqual(Expect, ?output(Expression))).
+-define(output(Expression, Columns, Rows),
+        solarized_capture:output(fun () -> (Expression) end,
+                                 (Columns),
+                                 (Rows))).
 -define(outputEqual(Expect, Expression, Columns, Rows),
-        ?assertEqual((Expect),
-                     solarized_capture:output(
-		       fun () -> (Expression) end,
-		       (Columns),
-		       (Rows)))).
+        ?assertEqual(Expect, ?output(Expression, Columns, Rows))).
 -define(_outputEqual(Expect, Expression),
         ?_test(?outputEqual(Expect, Expression))).
 -define(_outputEqual(Expect, Expression, Columns, Rows),
         ?_test(?outputEqual(Expect, Expression, Columns, Rows))).
 
+-define(outputEqualToFile(App, File, Test),
+        solarized_assert:output_equal_to_file((App), (File), (Test))).
+
+-define(result(Expression, Columns, Rows),
+        element(1,
+                solarized_capture:result_and_output(fun () -> (Expression) end,
+                                                    (Columns),
+                                                    (Rows)))).
 -define(resultEqual(Expect, Expression, Columns, Rows),
-        ?assertEqual((Expect),
-                     element(1, solarized_capture:result_and_output(
-                                  fun () -> (Expression) end,
-                                  (Columns),
-                                  (Rows))))).
+        ?assertEqual(Expect, ?result(Expression, Columns, Rows))).
 -define(_resultEqual(Expect, Expression, Columns, Rows),
         ?_test(?resultEqual(Expect, Expression, Columns, Rows))).
 

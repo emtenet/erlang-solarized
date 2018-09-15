@@ -1,0 +1,115 @@
+= `eunit.hrl` header file
+
+Useful macros for use in EUnit tests.
+
+== Usage
+
+Pair this with the standard EUnit header file:
+
+[source,erlang]
+----
+-include_lib("eunit/include/eunit.hrl").
+-include_lib("solarized/include/eunit.hrl").
+----
+
+== `?output(Expression__[, Columns, Rows]__)` macro
+
+When the expression you are capturing output from is simple,
+the `solarized_capture:output/1` call can be similified also.
+The following two expressions are equivilent:
+
+[source,erlang]
+----
+?assertEqual(<<$\n>>, ?output(solarized:nl()))
+?assertEqual(<<$\n>>, solarized_capture:output(fun () -> solarized:nl() end))
+----
+
+NOTE: Use `begin ... end` to group multiple expressions. For example:
+
+[source,erlang]
+----
+?assertEqual(<<$\n>>,
+             ?output(begin
+                         solarized:nl(),
+                         solarized:nl()
+                     end))
+----
+
+Defined as:
+
+[source,erlang]
+----
+-define(output(Expression),
+        solarized_capture:output(fun () -> Expression end)).
+-define(output(Expression, Columns, Rows),
+        solarized_capture:output(fun () -> Expression end, Columns, Rows)).
+----
+
+== `?outputEqual(Expect, Expression__[, Columns, Rows]__)`
+
+Similar to `?assertEqual(Expect, Expression)` but compares the out put of
+`Expression` rather than the value.
+Defined as:
+
+[source,erlang]
+----
+-define(outputEqual(Expect, Expression),
+        ?assertEqual(Expect, ?output(Expression))).
+-define(outputEqual(Expect, Expression, Columns, Rows),
+        ?assertEqual(Expect, ?output(Expression, Columns, Rows))).
+----
+
+== `?_outputEqual(Expect, Expression__[, Columns, Rows]__)`
+
+Similar to `?_assertEqual(Expect, Expression)`.
+Defined as:
+
+[source,erlang]
+----
+-define(_outputEqual(Expect, Expression),
+        ?_test(?outputEqual(Expect, Expression))).
+-define(_outputEqual(Expect, Expression, Columns, Rows),
+        ?_test(?outputEqual(Expect, Expression, Columns, Rows))).
+----
+
+== `?outputEqualToFile(App, File, Test[, Columns, Rows]__)`
+
+When the expected value is large and complex and you are more concerned about
+how it looks rather than how it is encoded, save it as a file in:
+
+* `__App__/tests/__File__.expect`
+
+You gain the following benifits:
+
+* You can `cat __File__.expect` to see it visably rendered in your terminal,
+* When your expectations change and you are happy with the new `__File__.output`
+, copy it over `__File__.expect`
+
+The `?outputEqualToFile` macro supports such a work flow.
+Use like:
+
+[source,erlang]
+----
+a_test() ->
+    Test = fun () ->
+        ...
+    end,
+    ?assert(?outputEqualToFile(__App__, __File__, Test)).
+----
+
+Where `__App__` is your application `atom()` to be used by `code:lib_dir(__App__, tests)`.
+
+Where `__File__` is the base of the following two files:
+
+* `__App__/tests/__File__.expect`
+* `__App__/tests/__File__.output`
+
+The test logic is as follows:
+
+* If no `.expect` file exists then
+the test *fails* and the captured output is saved to the `.output` file.
+* If the captured output does not match the `.expect` file then
+the test *fails* and the captured output is saved to the `.output` file.
+* If the captured output matches the `.expect` file then
+the test *passes* and the `.output` file is removed.
+

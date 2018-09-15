@@ -311,6 +311,49 @@ empty_apply_test() ->
     Expect = <<?E, ?BLUE, ?M, "blue text", ?RESET>>,
     ?outputEqual(Expect, ok = solarized:styled(Text)).
 
+styled_test() ->
+    Text = styled_test_colors(),
+    Test = fun () -> ok = solarized:styled(Text) end,
+    ?assert(?outputEqualToFile(solarized, styled_test, Test)).
+
+styled_test_colors() ->
+    Colors =
+        [ text
+        , comment
+        , emphasize
+        , blue
+        , cyan
+        , green
+        , magenta
+        , orange
+        , red
+        , violet
+        , yellow
+        ],
+    [ styled_test_color(Color) || Color <- Colors ].
+
+styled_test_color(Color) ->
+    Name = io_lib:format("~10s: ", [Color]),
+    [{Color, [Name | styled_test_reverse()]}, $\n].
+
+styled_test_reverse() ->
+    [ <<"r ">>, styled_test_highlight(), $\s
+    , {reverse, [<<"R ">>, styled_test_highlight()]}
+    ].
+
+styled_test_highlight() ->
+    [ <<"h ">>, styled_test_bold(), $\s
+    , {highlight, [<<"H ">>, styled_test_bold()]}
+    ].
+
+styled_test_bold() ->
+    [ <<"b ">>, styled_test_underline(), $\s
+    , {bold, [<<"B ">>, styled_test_underline()]}
+    ].
+
+styled_test_underline() ->
+    [<<"u ">>, {underline, <<"U">>}].
+
 -endif.
 
 %=======================================================================
