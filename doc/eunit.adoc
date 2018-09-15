@@ -24,7 +24,9 @@ The following two expressions are equivilent:
 ?assertEqual(<<$\n>>, solarized_capture:output(fun () -> solarized:nl() end))
 ----
 
-NOTE: Use `begin ... end` to group multiple expressions. For example:
+[NOTE]
+====
+Use `begin ... end` to group multiple expressions. For example:
 
 [source,erlang]
 ----
@@ -34,6 +36,7 @@ NOTE: Use `begin ... end` to group multiple expressions. For example:
                          solarized:nl()
                      end))
 ----
+====
 
 Defined as:
 
