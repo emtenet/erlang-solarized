@@ -12,6 +12,9 @@ The `solarized` module contains the following:
 ** `solarized:Color/1`
 ** `solarized:Color/2`
 ** `solarized:Color/3`
+* <<titles>>
+** `solarized:title/2`
+** `solarized:section/2`
 * <<utilities>>
 ** <<columns>>
 ** <<rows>>
@@ -142,6 +145,33 @@ Color(Apply, Text) ->
 Color(Apply, Format, Data) ->
     styled({Color, Apply, io_lib:format(Format, Data)}).
 ----
+
+[#titles]
+== Title and section headings
+
+Output title and section headings in the form:
+
+----
+== Title =====================
+-- Section -------------------
+----
+
+[source,erlang]
+----
+-spec solarized:title(Color, Text) -> ok
+    when
+      Color :: color(),
+      Text :: unicode:chardata().
+
+-spec solarized:section(Color, Text) -> ok
+    when
+      Color :: color(),
+      Text :: unicode:chardata().
+----
+
+NOTE: `solarized:columns()` is used to adapt to different terminal widths.
+
+Inspired by error messages of https://elm-lang.org/[Elm].
 
 [#utilities]
 == Utilities

@@ -17,6 +17,8 @@
         , red/1, red/2, red/3
         , violet/1, violet/2, violet/3
         , yellow/1, yellow/2, yellow/3
+        , title/2
+        , section/2
         , columns/0
         , rows/0
         , nl/0
@@ -913,6 +915,72 @@ yellow_test_() ->
     , ?_outputEqual(Expect, ok = solarized:yellow("~s", [Text]))
     , ?_outputEqual(Expect, ok = solarized:yellow(bold_off, Text))
     , ?_outputEqual(Expect, ok = solarized:yellow(bold_off, "~s", [Text]))
+    ].
+
+-endif.
+
+%=======================================================================
+
+-spec solarized:title(Color, Text) -> ok
+    when
+      Color :: color(),
+      Text :: unicode:chardata().
+
+title(Color, Text) when is_binary(Text) ->
+    Repeat = columns() - 5 - erlang:size(Text),
+    Line = io_lib:format("== ~s ~*..*s", [Text, Repeat, $=, <<>>]),
+    styled([{Color, Line}, $\n]);
+title(Color, Text) ->
+    title(Color, unicode:characters_to_binary(Text)).
+
+%-----------------------------------------------------------------------
+
+-ifdef(EUNIT).
+
+title_test_() ->
+    Binary = <<"Title">>,
+    String = "Title",
+    Expect =
+        <<?E, ?BLUE, ?M
+        , "== Title =========="
+        , ?RESET
+        , $\n
+        >>,
+    [ ?_outputEqual(Expect, ok = solarized:title(blue, Binary), 20, 25)
+    , ?_outputEqual(Expect, ok = solarized:title(blue, String), 20, 25)
+    ].
+
+-endif.
+
+%=======================================================================
+
+-spec solarized:section(Color, Text) -> ok
+    when
+      Color :: color(),
+      Text :: unicode:chardata().
+
+section(Color, Text) when is_binary(Text) ->
+    Repeat = columns() - 5 - erlang:size(Text),
+    Line = io_lib:format("-- ~s ~*..*s", [Text, Repeat, $-, <<>>]),
+    styled([{Color, Line}, $\n]);
+section(Color, Text) ->
+    section(Color, unicode:characters_to_binary(Text)).
+
+%-----------------------------------------------------------------------
+
+-ifdef(EUNIT).
+
+section_test_() ->
+    Binary = <<"Section">>,
+    String = "Section",
+    Expect =
+        <<?E, ?BLUE, ?M
+        , "-- Section --------"
+        , ?RESET
+        , $\n
+        >>,
+    [ ?_outputEqual(Expect, ok = solarized:section(blue, Binary), 20, 25)
+    , ?_outputEqual(Expect, ok = solarized:section(blue, String), 20, 25)
     ].
 
 -endif.
