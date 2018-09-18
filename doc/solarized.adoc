@@ -44,6 +44,20 @@ directives:
     underline | underline_off.
 ----
 
+Multiple directives can be applied at once
+(i.e. `red` and `bold`)
+as a single application.
+
+[source,erlang]
+----
+-type solarized:application() ::
+    directive() |
+    {directive(), directive()}.
+----
+
+NOTE: This is currently limited to applying a pair of directives and covers
+most use cases. This may be expanded to larger tuples in the future.
+
 [#color]
 == Colors
 
@@ -158,14 +172,14 @@ Output title and section headings in the form:
 
 [source,erlang]
 ----
--spec solarized:title(Color, Text) -> ok
+-spec solarized:title(Style, Text) -> ok
     when
-      Color :: color(),
+      Style :: application(),
       Text :: unicode:chardata().
 
--spec solarized:section(Color, Text) -> ok
+-spec solarized:section(Style, Text) -> ok
     when
-      Color :: color(),
+      Style :: application(),
       Text :: unicode:chardata().
 ----
 

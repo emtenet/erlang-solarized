@@ -26,6 +26,7 @@
 
 -export_type([ color/0
              , directive/0
+             , application/0
              , styled/0
              ]).
 
@@ -53,6 +54,12 @@
     highlight | highlight_off |
     reverse | reverse_off |
     underline | underline_off.
+
+%-----------------------------------------------------------------------
+
+-type application() ::
+    directive() |
+    {directive(), directive()}.
 
 %-----------------------------------------------------------------------
 
@@ -921,15 +928,21 @@ yellow_test_() ->
 
 %=======================================================================
 
--spec solarized:title(Color, Text) -> ok
+-spec solarized:title(Style, Text) -> ok
     when
-      Color :: color(),
+      Style :: application(),
       Text :: unicode:chardata().
 
-title(Color, Text) when is_binary(Text) ->
+title(Style, Text) when is_binary(Text) ->
     Repeat = columns() - 5 - erlang:size(Text),
     Line = io_lib:format("== ~s ~*..*s", [Text, Repeat, $=, <<>>]),
-    styled([{Color, Line}, $\n]);
+    case Style of
+        Apply when is_atom(Apply) ->
+            styled([{Apply, Line}, $\n]);
+
+        {Apply1, Apply2} ->
+            styled([{Apply1, Apply2, Line}, $\n])
+    end;
 title(Color, Text) ->
     title(Color, unicode:characters_to_binary(Text)).
 
@@ -940,29 +953,43 @@ title(Color, Text) ->
 title_test_() ->
     Binary = <<"Title">>,
     String = "Title",
-    Expect =
+    Blue =
         <<?E, ?BLUE, ?M
         , "== Title =========="
         , ?RESET
         , $\n
         >>,
-    [ ?_outputEqual(Expect, ok = solarized:title(blue, Binary), 20, 25)
-    , ?_outputEqual(Expect, ok = solarized:title(blue, String), 20, 25)
+    BRed =
+        <<?E, ?RED, $;, ?BOLD, ?M
+        , "== Title =========="
+        , ?RESET
+        , $\n
+        >>,
+    [ ?_outputEqual(Blue, ok = solarized:title(blue, Binary), 20, 25)
+    , ?_outputEqual(Blue, ok = solarized:title(blue, String), 20, 25)
+    , ?_outputEqual(BRed, ok = solarized:title({bold, red}, String), 20, 25)
+    , ?_outputEqual(BRed, ok = solarized:title({red, bold}, String), 20, 25)
     ].
 
 -endif.
 
 %=======================================================================
 
--spec solarized:section(Color, Text) -> ok
+-spec solarized:section(Style, Text) -> ok
     when
-      Color :: color(),
+      Style :: application(),
       Text :: unicode:chardata().
 
-section(Color, Text) when is_binary(Text) ->
+section(Style, Text) when is_binary(Text) ->
     Repeat = columns() - 5 - erlang:size(Text),
     Line = io_lib:format("-- ~s ~*..*s", [Text, Repeat, $-, <<>>]),
-    styled([{Color, Line}, $\n]);
+    case Style of
+        Apply when is_atom(Apply) ->
+            styled([{Apply, Line}, $\n]);
+
+        {Apply1, Apply2} ->
+            styled([{Apply1, Apply2, Line}, $\n])
+    end;
 section(Color, Text) ->
     section(Color, unicode:characters_to_binary(Text)).
 
@@ -973,14 +1000,22 @@ section(Color, Text) ->
 section_test_() ->
     Binary = <<"Section">>,
     String = "Section",
-    Expect =
+    Blue =
         <<?E, ?BLUE, ?M
         , "-- Section --------"
         , ?RESET
         , $\n
         >>,
-    [ ?_outputEqual(Expect, ok = solarized:section(blue, Binary), 20, 25)
-    , ?_outputEqual(Expect, ok = solarized:section(blue, String), 20, 25)
+    BRed =
+        <<?E, ?RED, $;, ?BOLD, ?M
+        , "-- Section --------"
+        , ?RESET
+        , $\n
+        >>,
+    [ ?_outputEqual(Blue, ok = solarized:section(blue, Binary), 20, 25)
+    , ?_outputEqual(Blue, ok = solarized:section(blue, String), 20, 25)
+    , ?_outputEqual(BRed, ok = solarized:section({bold, red}, Binary), 20, 25)
+    , ?_outputEqual(BRed, ok = solarized:section({red, bold}, Binary), 20, 25)
     ].
 
 -endif.
