@@ -5,6 +5,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -export([ output_equal_to_file/3
+        , output_equal_to_file/5
         ]).
 
 %=======================================================================
@@ -20,6 +21,28 @@ output_equal_to_file(App, File, Test)
         when is_atom(App) andalso
              is_function(Test, 0) ->
     Output = solarized_capture:output(Test),
+    check_equal_to_file(App, File, Output).
+
+%=======================================================================
+
+-spec output_equal_to_file(App, File, Test, Columns, Rows) -> boolean()
+    when
+      App :: atom(),
+      File :: file:name_all(),
+      Test :: fun(() -> Result),
+      Columns :: solarized_capture:geometry(),
+      Rows :: solarized_capture:geometry(),
+      Result :: term().
+
+output_equal_to_file(App, File, Test, Columns, Rows)
+        when is_atom(App) andalso
+             is_function(Test, 0) ->
+    Output = solarized_capture:output(Test, Columns, Rows),
+    check_equal_to_file(App, File, Output).
+
+%=======================================================================
+
+check_equal_to_file(App, File, Output) ->
     BaseDir = code:lib_dir(App, tests),
     ok = ensure_tests_dir(BaseDir),
     BaseFile = filename:join(BaseDir, File),
@@ -35,7 +58,7 @@ output_equal_to_file(App, File, Test)
             false
     end.
 
-%-----------------------------------------------------------------------
+%=======================================================================
 
 ensure_tests_dir(TestsDir) ->
     case file:make_dir(TestsDir) of

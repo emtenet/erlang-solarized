@@ -19,6 +19,8 @@
         , yellow/1, yellow/2, yellow/3
         , title/2
         , section/2
+        , term/2, term/3
+        , diff/4, diff/5
         , columns/0
         , rows/0
         , nl/0
@@ -1019,6 +1021,76 @@ section_test_() ->
     ].
 
 -endif.
+
+%=======================================================================
+
+-spec solarized:term(Style, Term) -> ok
+    when
+      Style :: application(),
+      Term :: term().
+
+term(Style, Term) ->
+    styled(solarized_diff:term(Style, Term, #{})).
+
+%=======================================================================
+
+-spec solarized:term(Style, Term, Options) -> ok
+    when
+      Style :: application(),
+      Term :: term(),
+      Options :: solarized_diff:options().
+
+term(Style, Term, Options) ->
+    styled(solarized_diff:term(Style, Term, Options)).
+
+%-----------------------------------------------------------------------
+
+-ifdef(EUNIT).
+
+term_test() ->
+    Term =
+        #{binary => <<"binary">>
+        , list => [a, b, c]
+        , improper => [a, b, c | improper]
+        , integer => 42
+        , tuple => {2018, 9, 20}
+        },
+    Style = {highlight, blue},
+    Options =
+        #{ indent => [" ", {bold, comment, "|"}]
+        , hanging => false
+        },
+    Test = fun () ->  solarized:term(Style, Term, Options) end,
+    ?assert(?outputEqualToFile(solarized, term_test, Test, 40, 25)).
+
+-endif.
+
+%=======================================================================
+
+-spec solarized:diff(OldStyle, NewStyle, OldTerm, NewTerm) -> Output
+    when
+      OldStyle :: application(),
+      NewStyle :: application(),
+      OldTerm :: term(),
+      NewTerm :: term(),
+      Output :: {styled(), styled()}.
+
+diff(OldStyle, NewStyle, OldTerm, NewTerm) ->
+    solarized_diff:diff(OldStyle, NewStyle, OldTerm, NewTerm, #{}).
+
+%=======================================================================
+
+-spec solarized:diff(OldStyle, NewStyle, OldTerm, NewTerm, Options) -> Output
+    when
+      OldStyle :: application(),
+      NewStyle :: application(),
+      OldTerm :: term(),
+      NewTerm :: term(),
+      Options :: solarized_diff:options(),
+      Output :: {styled(), styled()}.
+
+diff(OldStyle, NewStyle, OldTerm, NewTerm, Options) ->
+    solarized_diff:diff(OldStyle, NewStyle, OldTerm, NewTerm, Options).
 
 %=======================================================================
 

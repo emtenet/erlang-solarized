@@ -15,6 +15,12 @@ The `solarized` module contains the following:
 * <<titles>>
 ** `solarized:title/2`
 ** `solarized:section/2`
+* <<term>>
+** `solarized:term/2`
+** `solarized:term/3`
+* <<diff>>
+** `solarized:diff/4`
+** `solarized:term/5`
 * <<utilities>>
 ** <<columns>>
 ** <<rows>>
@@ -186,6 +192,74 @@ Output title and section headings in the form:
 NOTE: `solarized:columns()` is used to adapt to different terminal widths.
 
 Inspired by error messages of https://elm-lang.org/[Elm].
+
+[#term]
+== Term output
+
+Output erlang terms formatted like Michael does:
+
+[source,erlang]
+----
+-spec solarized:term(Style, Term) -> ok
+    when
+      Style :: application(),
+      Term :: term().
+
+-spec solarized:term(Style, Term, Options) -> ok
+    when
+      Style :: application(),
+      Term :: term(),
+      Options :: diff_options().
+----
+
+where the `Options` are shared with <<diff>>.
+
+[#diff]
+== Diff output
+
+Diff two erlang terms producing `styled()` text:
+
+[source,erlang]
+----
+-spec solarized:diff(OldStyle, NewStyle, OldTerm, NewTerm) -> ok
+    when
+      OldStyle :: application(),
+      NewStyle :: application(),
+      OldTerm :: term(),
+      NewTerm :: term().
+
+-spec solarized:diff(OldStyle, NewStyle, OldTerm, NewTerm, Options) -> ok
+    when
+      OldStyle :: application(),
+      NewStyle :: application(),
+      OldTerm :: term(),
+      NewTerm :: term(),
+      Options :: diff_options().
+
+-type solarized_diff:options() ::
+    #{ indent => pos_integer() | styled(),
+       hanging => boolean(),
+       common => application()
+       width => pos_integer()}.
+----
+
+with `Options`:
+
+indent::
+Either the number of spaces to indent or some styled text.
+
+hanging::
+For multi-line text and a styled indent:
++
+  * *false*: all lines are indented the same, or
+  * *true*: (*default*) following lines are indented with spaces equal in width to the first line styled indent.
+
+common::
+The applied style for term components that are the same.
+
+width::
+Maximum with of formatted term not including size of indent.
+The width is clamped by the terminal width (<<columns>>).
 
 [#utilities]
 == Utilities

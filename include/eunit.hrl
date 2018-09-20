@@ -22,6 +22,8 @@
 
 -define(outputEqualToFile(App, File, Test),
         solarized_assert:output_equal_to_file((App), (File), (Test))).
+-define(outputEqualToFile(App, File, Test, Columns, Rows),
+        solarized_assert:output_equal_to_file((App), (File), (Test), (Columns), (Rows))).
 
 -define(result(Expression, Columns, Rows),
         element(1,
