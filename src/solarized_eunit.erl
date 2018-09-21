@@ -316,7 +316,8 @@ report_exception({Class, Reason, Stack}, Output) ->
 %-----------------------------------------------------------------------
 
 report_exception_stack(Class, Reason, Output, [{M, _, _, _} | Stack])
-        when M =:= eunit_proc ->
+        when M =:= eunit_proc orelse
+             M =:= eunit_test ->
     % skip stack references to eunit
     report_exception_stack(Class, Reason, Output, Stack);
 report_exception_stack(Class, Reason, Output, [{M, F, A, Loc} | Stack])
