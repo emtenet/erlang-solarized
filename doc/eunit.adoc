@@ -116,3 +116,6 @@ the test *fails* and the captured output is saved to the `.output` file.
 * If the captured output matches the `.expect` file then
 the test *passes* and the `.output` file is removed.
 
+== Licence
+
+See link:../LICENSE[LICENSE] for licensing information.

@@ -88,3 +88,6 @@ Support was added for the mocking of `io:columns()` and `io:rows()`.
 
 Mocking of input was lost to gain a simplification of the API as a single call.
 
+== Licence
+
+See link:../LICENSE[LICENSE] for licensing information.

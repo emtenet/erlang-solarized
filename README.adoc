@@ -68,3 +68,6 @@ solarized as follows:
 * default foreground color: *base0* `rgb(131, 148, 150)`
 * default background color: *base03* `rgb(0, 43, 54)`
 
+== Licence
+
+See link:../LICENSE[LICENSE] for licensing information.

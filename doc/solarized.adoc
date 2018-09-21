@@ -1,4 +1,4 @@
-= solarized module
+= `solarized` module
 
 The `solarized` module contains the following:
 
@@ -300,3 +300,6 @@ the underlying call is unsupported.
 
 This is an alias for `io:nl()`.
 
+== Licence
+
+See link:../LICENSE[LICENSE] for licensing information.
