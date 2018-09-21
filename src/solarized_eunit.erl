@@ -324,6 +324,10 @@ report_exception_stack(Class, Reason, Output, [{M, F, A, Loc} | Stack]) ->
     solarized:text(<<"called with:\n">>),
     solarized:term(cyan, A, #{ indent => 2 }),
     report_exception_stack(Class, Reason, Output, Stack);
+report_exception_stack(Class, Reason, Output, [{M, _, _, _} | Stack])
+        when M =:= eunit_proc ->
+    % skip stack references to eunit
+    report_exception_stack(Class, Reason, Output, Stack);
 report_exception_stack(Class, Reason, Output, []) ->
     report_exception_output(Class, Reason, Output).
 
