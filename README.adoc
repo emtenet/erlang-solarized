@@ -13,6 +13,10 @@ see link:LICENSE[`LICENSE`].
 +
 Output styled text.
 
+* link:doc/solarized_eunit.adoc[`solarized_eunit`] module.
++
+Solarized reports from Eunit.
+
 * link:doc/solarized_capture.adoc[`solarized_capture`] module.
 +
 Mock and capture output (including rows and columns) for use in tests.
@@ -23,10 +27,22 @@ Useful macros for use in EUnit tests.
 
 == Usage with erlang.mk
 
+When using to create solarized output:
+
 .Makefile
 ----
 DEPS = solarized
-dep_solarized = git https://github.com/emtenet/solarized-erlang master
+dep_solarized = git https://github.com/emtenet/erlang-solarized master
+----
+
+When using to solarize EUnit reports:
+
+.Makefile
+----
+TEST_DEPS = solarized
+dep_solarized = git https://github.com/emtenet/erlang-solarized master
+
+EUNIT_OPTS = no_tty, {report, {solarized_eunit, []}}
 ----
 
 == Solarized terminal

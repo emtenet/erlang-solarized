@@ -1,0 +1,25 @@
+= `solarized_eunit` module
+
+The `solarized_eunit` module is a listener for EUnit that displays EUnit's
+reports solarized.
+
+== Usage with erlang.mk
+
+.Makefile
+----
+TEST_DEPS = solarized
+dep_solarized = git https://github.com/emtenet/erlang-solarized master
+
+EUNIT_OPTS = no_tty, {report, {solarized_eunit, []}}
+----
+
+== Inspiration
+
+This EUnit listener was inspired by:
+
+- https://github.com/seancribbs/eunit_formatters
+- https://github.com/erlang/otp/blob/master/lib/eunit/src/eunit_tty.erl
+
+== Licence
+
+See link:../LICENSE[LICENSE] for licensing information.
