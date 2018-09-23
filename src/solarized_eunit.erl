@@ -371,7 +371,7 @@ report_exception_error({assert, Props}) when is_list(Props) ->
     solarized:red(<<"  ?assert(_, ">>),
     solarized:text("~ts", [Expression]),
     solarized:red(<<")\n">>),
-    {E, V} = solarized:diff(green, orange, Expected, Value, #{ indent => 2}),
+    {E, V} = report_exception_diff(Expected, Value),
     solarized:text(<<"expected:\n">>),
     solarized:styled(E),
     solarized:text(<<"got:\n">>),
@@ -384,7 +384,7 @@ report_exception_error({assertEqual, Props}) when is_list(Props) ->
     solarized:red(<<"  ?assertEqual(_, ">>),
     solarized:text("~ts", [Expression]),
     solarized:red(<<")\n">>),
-    {E, V} = solarized:diff(green, orange, Expected, Value, #{ indent => 2}),
+    {E, V} = report_exception_diff(Expected, Value),
     solarized:text(<<"expected:\n">>),
     solarized:styled(E),
     solarized:text(<<"got:\n">>),
@@ -404,6 +404,12 @@ report_exception_error({badmatch, Value}) ->
 report_exception_error(Reason) ->
     solarized:text(<<"error:\n">>),
     solarized:term(orange, Reason, #{ indent => 2 }).
+
+%-----------------------------------------------------------------------
+
+report_exception_diff(Expected, Value) ->
+    Options = #{ indent => {comment, bold, <<" |">>}, hanging => false },
+    solarized:diff(green, orange, Expected, Value, Options).
 
 %=======================================================================
 

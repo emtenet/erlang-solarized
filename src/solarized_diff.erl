@@ -196,6 +196,8 @@ sized(Same, Tuple) when is_tuple(Tuple) ->
     tuple_sized(Same, Tuple);
 sized(Same, Map) when is_map(Map) ->
     map_sized(Same, Map);
+sized(Same, Binary) when is_binary(Binary) ->
+    solarized_binary:sized(Same, Binary);
 sized(Same, Term) ->
     scalar_sized(Same, Term).
 
@@ -420,7 +422,26 @@ styled(Styling, I, W, Acc, {improper, Same, _, Items}) ->
 styled(Styling, I, W, Acc, {tuple, Same, _, Items}) ->
     styled_items(Styling, I, W, Same, <<"{ ">>, $}, Acc, Items);
 styled(Styling, I, W, Acc, Map = {map, _, _, _}) ->
-    styled_map(Styling, I, W, Acc, Map).
+    styled_map(Styling, I, W, Acc, Map);
+styled(Styling, I, W, Acc, {binary, Same, _, Binary}) ->
+    styled_binary(Styling, I, W, Same, Acc, Binary).
+
+%=======================================================================
+
+styled_binary(Styling, I, W, Same, Acc, Binary) ->
+    Lines = solarized_binary:styled(W, Binary),
+    styled_binary_lines(Styling, I, Same, Acc, Lines).
+
+%-----------------------------------------------------------------------
+
+styled_binary_lines(_, _, _, Acc, []) ->
+    Acc;
+styled_binary_lines(Styling, I, Same, Acc0, [newline | Lines]) ->
+    Acc1 = styled_newline(Styling, I, Acc0),
+    styled_binary_lines(Styling, I, Same, Acc1, Lines);
+styled_binary_lines(Styling, I, Same, Acc0, [Line | Lines]) ->
+    Acc1 = styled_text(Styling, Same, Line, Acc0),
+    styled_binary_lines(Styling, I, Same, Acc1, Lines).
 
 %=======================================================================
 
@@ -433,7 +454,15 @@ styled_inline(Styling, Acc, {improper, Same, _, Items}) ->
 styled_inline(Styling, Acc, {tuple, Same, _, Items}) ->
     styled_inline_items(Styling, Same, ${, $}, Acc, Items);
 styled_inline(Styling, Acc, {map, Same, _, Items}) ->
-    styled_inline_map(Styling, Same, Acc, Items).
+    styled_inline_map(Styling, Same, Acc, Items);
+styled_inline(Styling, Acc, {binary, Same, _, Binary}) ->
+    styled_inline_binary(Styling, Same, Acc, Binary).
+
+%-----------------------------------------------------------------------
+
+styled_inline_binary(Styling, Same, Acc, Binary) ->
+    Text = solarized_binary:inline(Binary),
+    styled_text(Styling, Same, Text, Acc).
 
 %-----------------------------------------------------------------------
 

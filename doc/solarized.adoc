@@ -261,6 +261,11 @@ width::
 Maximum with of formatted term not including size of indent.
 The width is clamped by the terminal width (<<columns>>).
 
+NOTE: Binary terms are assumed to be UTF-8 encoded strings and are displayed
+as such even when invalid UTF-8 sequences or non-printable codepoints are
+sprinkled amongst the string text.
+For convenience, strings are wrapped after `\n` codepoints.
+
 [#utilities]
 == Utilities
 
