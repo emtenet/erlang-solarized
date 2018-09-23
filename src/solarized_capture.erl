@@ -6,7 +6,6 @@
 %    https://github.com/marco-m/mock_io
 %    Copyright (c) 2015, Marco Molteni
 -module(solarized_capture).
--include_lib("eunit/include/eunit.hrl").
 
 -export([ output/1
         , output/3
@@ -26,6 +25,10 @@
 -type internal_geometry() ::
       pos_integer()
     | {error, enotsup}.
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 %=======================================================================
 
@@ -197,7 +200,7 @@ mock_call(Mock, Request) ->
 
 %=======================================================================
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 %-----------------------------------------------------------------------
 

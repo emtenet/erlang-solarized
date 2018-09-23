@@ -2,11 +2,14 @@
 
 %% See LICENSE for licensing information.
 -module(solarized_assert).
--include_lib("eunit/include/eunit.hrl").
 
 -export([ output_equal_to_file/3
         , output_equal_to_file/5
         ]).
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 %=======================================================================
 

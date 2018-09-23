@@ -3,7 +3,7 @@
 %% See LICENSE for licensing information.
 %=======================================================================
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 -define(output(Expression),
         solarized_capture:output(fun () -> (Expression) end)).

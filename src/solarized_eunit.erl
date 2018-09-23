@@ -12,8 +12,6 @@
 %%
 %% Pass option no_tty to disable default eunit reporting.
 -module(solarized_eunit).
--define(NOTEST, true).
--include_lib("eunit/include/eunit.hrl").
 
 %% Started by eunit based on option:
 %%   {report, {eunit_solarized, Options}}

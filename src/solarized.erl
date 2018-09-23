@@ -2,8 +2,6 @@
 
 %% See LICENSE for licensing information.
 -module(solarized).
--include_lib("eunit/include/eunit.hrl").
--include("eunit.hrl").
 
 -export([ styled/1
         , text/1, text/2, text/3
@@ -31,6 +29,11 @@
              , application/0
              , styled/0
              ]).
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-include("eunit.hrl").
+-endif.
 
 %=======================================================================
 
@@ -289,7 +292,7 @@ styled_apply(U, {C, B, H, R, _}) when ?IS_UNDERLINE(U) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 red_bold_test() ->
     Text = {red, [{bold, <<"bold">>}, <<" text">>]},
@@ -405,7 +408,7 @@ text(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 text_test_() ->
     Text = <<"text">>,
@@ -456,7 +459,7 @@ comment(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 comment_test_() ->
     Text = <<"text">>,
@@ -507,7 +510,7 @@ emphasize(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 emphasize_test_() ->
     Text = <<"text">>,
@@ -558,7 +561,7 @@ blue(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 blue_test_() ->
     Text = <<"text">>,
@@ -609,7 +612,7 @@ cyan(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 cyan_test_() ->
     Text = <<"text">>,
@@ -660,7 +663,7 @@ green(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 green_test_() ->
     Text = <<"text">>,
@@ -711,7 +714,7 @@ magenta(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 magenta_test_() ->
     Text = <<"text">>,
@@ -762,7 +765,7 @@ orange(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 orange_test_() ->
     Text = <<"text">>,
@@ -813,7 +816,7 @@ red(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 red_test_() ->
     Text = <<"text">>,
@@ -864,7 +867,7 @@ violet(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 violet_test_() ->
     Text = <<"text">>,
@@ -915,7 +918,7 @@ yellow(Apply, Format, Data) when is_atom(Apply) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 yellow_test_() ->
     Text = <<"text">>,
@@ -950,7 +953,7 @@ title(Color, Text) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 title_test_() ->
     Binary = <<"Title">>,
@@ -997,7 +1000,7 @@ section(Color, Text) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 section_test_() ->
     Binary = <<"Section">>,
@@ -1045,7 +1048,7 @@ term(Style, Term, Options) ->
 
 %-----------------------------------------------------------------------
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 term_test() ->
     Term =
@@ -1107,7 +1110,7 @@ columns() ->
             80
     end.
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 columns_test_() ->
     [ ?_resultEqual(40, solarized:columns(), 40, enotsup)
@@ -1131,7 +1134,7 @@ rows() ->
             25
     end.
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 rows_test_() ->
     [ ?_resultEqual(12, solarized:rows(), enotsup, 12)
@@ -1147,7 +1150,7 @@ rows_test_() ->
 nl() ->
     io:nl().
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 nl_test() ->
     Expect = <<$\n>>,

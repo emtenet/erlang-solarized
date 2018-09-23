@@ -2,13 +2,16 @@
 
 %% See LICENSE for licensing information.
 -module(solarized_diff).
--include_lib("eunit/include/eunit.hrl").
 
 -export([ diff/5
         , term/3
         ]).
 
 -export_type([ options/0 ]).
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 %=======================================================================
 
@@ -601,7 +604,7 @@ styled_newline_indent(Indent, Acc) ->
 
 %=======================================================================
 
--ifdef(EUNIT).
+-ifdef(TEST).
 
 tuple_diffed_test_() ->
     Old = {2018, 1, 1},
