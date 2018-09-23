@@ -78,7 +78,7 @@ option_common(#{ common := Common = {_, _} }) ->
 option_common(#{ common := _ }) ->
     error(badarg);
 option_common(_) ->
-    term.
+    text.
 
 %-----------------------------------------------------------------------
 
