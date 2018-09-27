@@ -51,51 +51,49 @@ sized(<<>>, string, Max) ->
 sized(<<>>, byte, Max) ->
     Max + 2;
 sized(<<C, Rest/binary>>, Mode, Max) when ?ESCAPED(C) ->
-    sized(Rest, Mode, Max, string, 2);
+    sized_string(Rest, Mode, Max, 2);
 sized(Binary, Mode, Max) ->
     case string:next_grapheme(Binary) of
+        [C, Rest] when ?UNICODE(C) ->
+            sized_string(Rest, Mode, Max, 1);
+
         [C | Rest] when ?UNICODE(C) ->
-            sized(Rest, Mode, Max, string, 1);
+            sized_string(Rest, Mode, Max, 1);
 
         [G | Rest] when is_list(G) ->
-            sized(Rest, Mode, Max, string, 1);
+            sized_string(Rest, Mode, Max, 1);
 
         _ ->
             <<N, Rest/binary>> = Binary,
-            if  N < 10 ->
-                    sized(Rest, Mode, Max, byte, 1);
-
-                N < 100 ->
-                    sized(Rest, Mode, Max, byte, 2);
-
-                true ->
-                    sized(Rest, Mode, Max, byte, 3)
-            end
+            sized_byte(Rest, Mode, Max, size_of_byte(N))
     end.
 
 %-----------------------------------------------------------------------
 
-sized(Rest, Was, Max, Mode, Add) when Mode =:= string ->
-    case Was of
+sized_string(Rest, Mode, Max, Add) ->
+    case Mode of
         start ->
-            sized(Rest, Mode, Max + 1 + Add);
+            sized(Rest, string, Max + 1 + Add);
 
         string ->
-            sized(Rest, Mode, Max + Add);
+            sized(Rest, string, Max + Add);
 
         byte ->
-            sized(Rest, Mode, Max + 2 + Add)
-    end;
-sized(Rest, Was, Max, Mode, Add) when Mode =:= byte ->
-    case Was of
+            sized(Rest, string, Max + 2 + Add)
+    end.
+
+%-----------------------------------------------------------------------
+
+sized_byte(Rest, Mode, Max, Add) ->
+    case Mode of
         start ->
-            sized(Rest, Mode, Max + Add);
+            sized(Rest, byte, Max + Add);
 
         byte ->
-            sized(Rest, Mode, Max + 1 + Add);
+            sized(Rest, byte, Max + 1 + Add);
 
         string ->
-            sized(Rest, Mode, Max + 2 + Add)
+            sized(Rest, byte, Max + 2 + Add)
     end.
 
 %=======================================================================
@@ -364,6 +362,15 @@ escape($\f) -> <<"\\f">>;
 escape($\e) -> <<"\\e">>;
 escape($\\) -> <<"\\\\">>;
 escape($\") -> <<"\\\"">>.
+
+%-----------------------------------------------------------------------
+
+size_of_byte(N) when N < 10 ->
+    1;
+size_of_byte(N) when N < 100 ->
+    2;
+size_of_byte(N) ->
+    3.
 
 %-----------------------------------------------------------------------
 
