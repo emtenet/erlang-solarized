@@ -229,32 +229,52 @@ list_diffed(Olds, News)
     { list_sized(diff, Olds)
     , list_sized(diff, News)
     };
-list_diffed(Olds, News) ->
-    list_diffed(Olds, News, list_start(), list_start()).
+list_diffed(Left, Right) ->
+    {[L | Ls], [R | Rs]} = solarized_list_diff:diff(Left, Right),
+    list_diffed_same(L, R, Ls, Rs, list_start(), list_start()).
 
-list_diffed([], [], OldAcc, NewAcc) ->
-    { list_end(same, OldAcc)
-    , list_end(same, NewAcc)
+%-----------------------------------------------------------------------
+
+list_diffed_same([], [], [], [], La, Ra) ->
+    Same = list_same(La, Ra),
+    { list_end(Same, La)
+    , list_end(Same, Ra)
     };
-list_diffed([], News, OldAcc, NewAcc) ->
-    { list_end(diff, OldAcc)
-    , list_sized(diff, News, NewAcc)
+list_diffed_same([], [], [Ld | Ls], [Rd | Rs], La, Ra) ->
+    list_diffed_diff(Ld, Rd, Ls, Rs, La, Ra);
+list_diffed_same([], [], Ld, [], La, Ra) ->
+    D = sized(diff, Ld),
+    { list_improper(diff, D, La)
+    , list_end(diff, Ra)
     };
-list_diffed(Olds, [], OldAcc, NewAcc) ->
-    { list_sized(diff, Olds, OldAcc)
-    , list_end(diff, NewAcc)
+list_diffed_same([], [], [], Rd, La, Ra) ->
+    D = sized(diff, Rd),
+    { list_end(diff, La)
+    , list_improper(diff, D, Ra)
     };
-list_diffed([Old | Olds], [Old | News], OldAcc, NewAcc) ->
-    S = sized(same, Old),
-    list_diffed(Olds, News, list_item(S, OldAcc), list_item(S, NewAcc));
-list_diffed([Old | Olds], [New | News], OldAcc, NewAcc) ->
-    {O, N} = diffed(Old, New),
-    list_diffed(Olds, News, list_item(O, OldAcc), list_item(N, NewAcc));
-list_diffed(Old, New, OldAcc, NewAcc) ->
-    {O, N} = diffed(Old, New),
-    { list_improper(same, O, OldAcc)
-    , list_improper(same, N, NewAcc)
-    }.
+list_diffed_same([], [], Ld, Rd, La, Ra) ->
+    Same = list_same(La, Ra),
+    {L, R} = diffed(Ld, Rd),
+    { list_improper(Same, L, La)
+    , list_improper(Same, R, Ra)
+    };
+list_diffed_same([A | Ls], [A | Rs], Ld, Rd, La, Ra) ->
+    S = sized(same, A),
+    list_diffed_same(Ls, Rs, Ld, Rd, list_item(S, La), list_item(S, Ra)).
+
+%-----------------------------------------------------------------------
+
+list_diffed_diff([], [], [Ls | Ld], [Rs | Rd], La, Ra) ->
+    list_diffed_same(Ls, Rs, Ld, Rd, La, Ra);
+list_diffed_diff([L | Ld], [R | Rd], Ls, Rs, La, Ra) ->
+    {Li, Ri} = diffed(L, R),
+    list_diffed_diff(Ld, Rd, Ls, Rs, list_item(Li, La), list_item(Ri, Ra));
+list_diffed_diff([L | Ld], [], Ls, Rs, La, Ra) ->
+    Li = sized(diff, L),
+    list_diffed_diff(Ld, [], Ls, Rs, list_item(Li, La), Ra);
+list_diffed_diff([], [R | Rd], Ls, Rs, La, Ra) ->
+    Ri = sized(diff, R),
+    list_diffed_diff([], Rd, Ls, Rs, La, list_item(Ri, Ra)).
 
 %-----------------------------------------------------------------------
 
@@ -280,6 +300,11 @@ list_start() ->
 
 list_item(Diff = {_, _, L, _}, {Length, Diffs}) ->
     {Length + 2 + L, [Diff | Diffs]}.
+
+list_same({_, L}, {_, R}) when length(L) =:= length(R) ->
+    same;
+list_same(_, _) ->
+    diff.
 
 list_end(Same, {Length, Diffs}) ->
     {list, Same, Length, Diffs}.
