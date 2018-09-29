@@ -168,7 +168,21 @@ diffed(Old, Old) ->
 diffed(Old, New)
         when is_list(Old) andalso
              is_list(New) ->
-    list_diffed(Old, New);
+    case io_lib:printable_list(Old) of
+        true ->
+            case io_lib:printable_list(New) of
+                true ->
+                    { scalar_sized(diff, Old)
+                    , scalar_sized(diff, New)
+                    };
+
+                false ->
+                    list_diffed(Old, New)
+            end;
+
+        false ->
+            list_diffed(Old, New)
+    end;
 diffed(Old, New)
         when is_tuple(Old) andalso
              is_tuple(New) ->
