@@ -408,8 +408,16 @@ report_exception_error(Reason) ->
 %-----------------------------------------------------------------------
 
 report_exception_diff(Expected, Value) ->
-    Options = #{ indent => {comment, bold, <<" |">>}, hanging => false },
-    solarized:diff(green, orange, Expected, Value, Options).
+    try
+        Options = #{ indent => {comment, bold, <<" |">>}, hanging => false },
+        solarized:diff(green, orange, Expected, Value, Options)
+    catch
+        Class:Reason:Stack ->
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            {[], []}
+    end.
 
 %=======================================================================
 
