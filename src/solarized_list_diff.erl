@@ -12,7 +12,7 @@
 
 % A diff implementation based on:
 % - https://neil.fraser.name/writing/diff/
-% 
+%
 % More complete implementations already exist:
 % - https://github.com/mmzeeman/diffy
 % - https://github.com/tomas-abrahamsson/tdiff/
@@ -186,7 +186,7 @@ two_edits(Ln, Rn, Ls, Rs, Lt, Rt) ->
     case find_inside(Ls, Rs, 0, Rn - Ln - 1) of
         nomatch ->
             half_match(Ln, Rn, Ls, Rs, Lt, Rt);
-        
+
         {N, Suffix} ->
             Prefix = lists:sublist(Rs, N),
             { [[], Ls, [] | Lt]
