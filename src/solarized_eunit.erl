@@ -373,9 +373,9 @@ report_exception_error({assert, Props}) when is_list(Props) ->
     solarized:red(<<")\n">>),
     {E, V} = report_exception_diff(Expected, Value),
     solarized:text(<<"expected:\n">>),
-    solarized:styled(E),
+    report_exception_styled(E),
     solarized:text(<<"got:\n">>),
-    solarized:styled(V);
+    report_exception_styled(V);
 report_exception_error({assertEqual, Props}) when is_list(Props) ->
     Expression = proplists:get_value(expression, Props),
     Expected = proplists:get_value(expected, Props),
@@ -386,9 +386,9 @@ report_exception_error({assertEqual, Props}) when is_list(Props) ->
     solarized:red(<<")\n">>),
     {E, V} = report_exception_diff(Expected, Value),
     solarized:text(<<"expected:\n">>),
-    solarized:styled(E),
+    report_exception_styled(E),
     solarized:text(<<"got:\n">>),
-    solarized:styled(V);
+    report_exception_styled(V);
 report_exception_error({assertNotEqual, Props}) when is_list(Props) ->
     Expression = proplists:get_value(expression, Props),
     Value = proplists:get_value(value, Props),
@@ -417,6 +417,20 @@ report_exception_diff(Expected, Value) ->
             io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
             solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
             {[], []}
+    end.
+
+%-----------------------------------------------------------------------
+
+report_exception_styled(Styled) ->
+    try
+        solarized:styled(Styled)
+    catch
+        Class:Reason:Stack ->
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            io:format("--- styled ---~n~p~n", [Styled]),
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            ok
     end.
 
 %=======================================================================
