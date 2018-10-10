@@ -75,8 +75,10 @@ common_prefix_next(Prefix, Left, Right) ->
 % - a new list without the imporper tail
 % - the improper tail
 
-improper_length(L) ->
-    improper_length(L, L, 0).
+improper_length(L) when is_list(L) ->
+    improper_length(L, L, 0);
+improper_length(Improper) ->
+    {0, [], Improper}.
 
 improper_length(L, [], N) ->
     {N, L, []};
@@ -88,8 +90,11 @@ improper_length(L, Improper, N) ->
 -ifdef(TEST).
 
 improper_test_() ->
+    Diff = {[[a], [], [] | improper], [[a], [], []]},
     [ ?_assertEqual({2, [a, b], []}, improper_length([a, b]))
     , ?_assertEqual({2, [a, b], c}, improper_length([a, b | c]))
+    , ?_assertEqual({0, [], improper}, improper_length(improper))
+    , ?_assertEqual(Diff, diff([a | improper], [a]))
     ].
 
 -endif.
