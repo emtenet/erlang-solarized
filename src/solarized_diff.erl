@@ -191,6 +191,10 @@ diffed(Old, New)
         when is_map(Old) andalso
              is_map(New) ->
     map_diffed(Old, New);
+diffed(Old, New)
+        when is_binary(Old) andalso
+             is_binary(New) ->
+    solarized_binary:diffed(Old, New);
 diffed(Old, New) ->
     { sized(diff, Old)
     , sized(diff, New)
@@ -478,8 +482,12 @@ styled_binary_lines(_, _, _, Acc, []) ->
 styled_binary_lines(Styling, I, Same, Acc0, [newline | Lines]) ->
     Acc1 = styled_newline(Styling, I, Acc0),
     styled_binary_lines(Styling, I, Same, Acc1, Lines);
-styled_binary_lines(Styling, I, Same, Acc0, [Line | Lines]) ->
+styled_binary_lines(Styling, I, Same, Acc0, [Line | Lines])
+        when is_binary(Line) ->
     Acc1 = styled_text(Styling, Same, Acc0, Line),
+    styled_binary_lines(Styling, I, Same, Acc1, Lines);
+styled_binary_lines(Styling, I, Same, Acc0, [Line | Lines]) ->
+    Acc1 = styled_texts(Styling, Same, Acc0, Line),
     styled_binary_lines(Styling, I, Same, Acc1, Lines).
 
 %=======================================================================
@@ -500,8 +508,8 @@ styled_inline(Styling, Acc, {binary, Same, _, Binary}) ->
 %-----------------------------------------------------------------------
 
 styled_inline_binary(Styling, Same, Acc, Binary) ->
-    Text = solarized_binary:inline(Binary),
-    styled_text(Styling, Same, Acc, Text).
+    Texts = solarized_binary:inline(Binary),
+    styled_texts(Styling, Same, Acc, Texts).
 
 %-----------------------------------------------------------------------
 
@@ -640,6 +648,17 @@ styled_text({_, text, _}, diff, {_, Texts, Acc}, Text) ->
     {diff, Text, [Texts | Acc]};
 styled_text({_, Same, _}, diff, {_, Texts, Acc}, Text) ->
     {diff, Text, [{Same, Texts} | Acc]}.
+
+%-----------------------------------------------------------------------
+
+styled_texts(_, _, Acc, []) ->
+    Acc;
+styled_texts(Styling, Same, Acc0, [{SameText, Text} | Texts]) ->
+    Acc1 = styled_text(Styling, SameText, Acc0, Text),
+    styled_texts(Styling, Same, Acc1, Texts);
+styled_texts(Styling, Same, Acc0, [Text | Texts]) ->
+    Acc1 = styled_text(Styling, Same, Acc0, Text),
+    styled_texts(Styling, Same, Acc1, Texts).
 
 %=======================================================================
 
@@ -1094,6 +1113,40 @@ styled_hanging_test_() ->
     First = {<<"- ">>, text, yellow},
     Style = {<<"  ">>, text, yellow},
     ?_assertEqual(Vertical, styled(First, Style, 15, Diffed)).
+
+%-----------------------------------------------------------------------
+
+black_cat_test() ->
+    Old = <<"The black cat in the hat?">>,
+    New = <<"The cat in the black hat!">>,
+    Options = #{width => 20},
+    Expect =
+        { [ [<<"<<\"">>, <<"The ">>]
+          , {orange, <<"black ">>}
+          , [<<"cat in">>, <<"\"">>]
+          , $\n
+          , [<<", \"">>, <<" the ">>, <<"hat">>]
+          , {orange, <<"?">>}
+          , <<"\"">>
+          , $\n
+          , <<">>">>
+          , $\n
+          ]
+        , [ [<<"<<\"">>, <<"The ">>, <<"cat in the ">>]
+          , {yellow, <<"b">>}
+          , <<"\"">>
+          , $\n
+          , <<", \"">>
+          , {yellow, [<<"lac">>, <<"k ">>]}
+          , <<"hat">>
+          , {yellow, <<"!">>}
+          , <<"\"">>
+          , $\n
+          , <<">>">>
+          , $\n
+          ]
+        },
+    ?assertEqual(Expect, diff(orange, yellow, Old, New, Options)).
 
 %-----------------------------------------------------------------------
 

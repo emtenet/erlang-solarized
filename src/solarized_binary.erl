@@ -3,13 +3,15 @@
 %% See LICENSE for licensing information.
 -module(solarized_binary).
 
--export([ sized/2
+-export([ diffed/2
+        , sized/2
         , inline/1
         , styled/2
         ]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-include("eunit.hrl").
 -endif.
 
 %=======================================================================
@@ -36,11 +38,32 @@
 
 %=======================================================================
 
+diffed(<<>>, <<>>) ->
+    Empty = {scalar, same, 4, <<"<<>>">>},
+    {Empty, Empty};
+diffed(Old, New) ->
+    {O, N} = solarized_binary_diff:diff(Old, New),
+    Same = case size(Old) =:= size(New) of
+        true -> same;
+        false -> diff
+    end,
+    { {binary, Same, sized(Old), O}
+    , {binary, Same, sized(New), N}
+    }.
+
+%=======================================================================
+
 sized(Same, <<>>) ->
     {scalar, Same, 4, <<"<<>>">>};
-sized(Same, Binary) ->
-    Length = sized(Binary, start, 2),
-    {binary, Same, Length, Binary}.
+sized(Same = same, Binary) ->
+    {binary, Same, sized(Binary), [Binary]};
+sized(Same = diff, Binary) ->
+    {binary, Same, sized(Binary), [<<>>, Binary]}.
+
+%-----------------------------------------------------------------------
+
+sized(Binary) ->
+    sized(Binary, start, 2).
 
 %-----------------------------------------------------------------------
 
@@ -98,96 +121,102 @@ sized_byte(Rest, Mode, Max, Add) ->
 
 %=======================================================================
 
-inline(Binary) ->
-    lists:reverse(inline(Binary, [], empty)).
+inline([Part | Parts]) ->
+    inline(Part, Parts, same, [], empty).
 
 %-----------------------------------------------------------------------
 
-inline(<<>>, Acc, byte) ->
+inline(<<>>, [], _, Acc, byte) ->
     [<<">>">> | Acc];
-inline(<<>>, Acc, string) ->
+inline(<<>>, [], _, Acc, string) ->
     [<<"\">>">> | Acc];
-inline(<<C, Rest/binary>>, Acc, Mode)
+inline(<<>>, [Part | Parts], same, Acc, Mode) ->
+    inline(Part, Parts, diff, Acc, Mode);
+inline(<<>>, [Part | Parts], diff, Acc, Mode) ->
+    inline(Part, Parts, same, Acc, Mode);
+inline(<<C, Rest/binary>>, Parts, Same, Acc, Mode)
         when ?ESCAPED(C) ->
-    inline_escape(C, Rest, Acc, Mode);
-inline(Binary, Acc, Mode) ->
+    inline_escape(C, Rest, Parts, Same, Acc, Mode);
+inline(Binary, Parts, Same, Acc, Mode) ->
     case string:next_grapheme(Binary) of
         [C, Rest] when ?UNICODE(C) ->
-            inline_string(Binary, Rest, Acc, Mode);
+            inline_string(Binary, Rest, Parts, Same, Acc, Mode);
 
         [C | Rest] when ?UNICODE(C) ->
-            inline_string(Binary, Rest, Acc, Mode);
+            inline_string(Binary, Rest, Parts, Same, Acc, Mode);
 
         [G | Rest] when is_list(G) ->
-            inline_string(Binary, Rest, Acc, Mode);
+            inline_string(Binary, Rest, Parts, Same, Acc, Mode);
 
         _ ->
-            inline_byte(Binary, Acc, Mode)
+            inline_byte(Binary, Parts, Same, Acc, Mode)
     end.
 
 %-----------------------------------------------------------------------
 
-inline_escape(C, Rest, Acc, empty) ->
-    inline_escape_next(C, Rest, [<<"<<\"">> | Acc]);
-inline_escape(C, Rest, Acc, byte) ->
-    inline_escape_next(C, Rest, [<<",\"">> | Acc]);
-inline_escape(C, Rest, Acc, string) ->
-    inline_escape_next(C, Rest, Acc).
+inline_escape(C, Rest, Parts, Same, Acc, empty) ->
+    inline_escape_next(C, Rest, Parts, Same, [<<"<<\"">> | Acc]);
+inline_escape(C, Rest, Parts, Same, Acc, byte) ->
+    inline_escape_next(C, Rest, Parts, Same, [<<",\"">> | Acc]);
+inline_escape(C, Rest, Parts, Same, Acc, string) ->
+    inline_escape_next(C, Rest, Parts, Same, Acc).
 
 %-----------------------------------------------------------------------
 
-inline_escape_next(C, Rest, Acc) ->
-    Escape = escape(C),
-    inline(Rest, [Escape | Acc], string).
+inline_escape_next(C, Rest, Parts, Same, Acc) ->
+    Escape = {Same, escape(C)},
+    inline(Rest, Parts, Same, [Escape | Acc], string).
 
 %-----------------------------------------------------------------------
 
-inline_string(Start, Stop, Acc, empty) ->
-    inline_string(Start, Stop, [<<"<<\"">> | Acc]);
-inline_string(Start, Stop, Acc, byte) ->
-    inline_string(Start, Stop, [<<",\"">> | Acc]);
-inline_string(Start, Stop, Acc, string) ->
-    inline_string(Start, Stop, Acc).
+inline_string(Start, Stop, Parts, Same, Acc, empty) ->
+    inline_string(Start, Stop, Parts, Same, [<<"<<\"">> | Acc]);
+inline_string(Start, Stop, Parts, Same, Acc, byte) ->
+    inline_string(Start, Stop, Parts, Same, [<<",\"">> | Acc]);
+inline_string(Start, Stop, Parts, Same, Acc, string) ->
+    inline_string(Start, Stop, Parts, Same, Acc).
 
 %-----------------------------------------------------------------------
 
-inline_string(Start, [], Acc) ->
-    [<<"\">>">>, Start | Acc];
-inline_string(Start, Binary = <<C, Rest/binary>>, Acc)
+inline_string(Start, [], [], Same, Acc) ->
+    [<<"\">>">>, {Same, Start} | Acc];
+inline_string(Start, [], Parts, Same, Acc) ->
+    inline(<<>>, Parts, Same, [{Same, Start} | Acc], string);
+inline_string(Start, Binary = <<C, Rest/binary>>, Parts, Same, Acc)
         when ?ESCAPED(C) ->
-    String = between(Start, Binary),
-    Escape = escape(C),
-    inline(Rest, [Escape, String | Acc], string);
-inline_string(Start, Binary, Acc) ->
+    String = {Same, between(Start, Binary)},
+    Escape = {Same, escape(C)},
+    inline(Rest, Parts, Same, [Escape, String | Acc], string);
+inline_string(Start, Binary, Parts, Same, Acc) ->
     case string:next_grapheme(Binary) of
         [C, Rest] when ?UNICODE(C) ->
-            inline_string(Start, Rest, Acc);
+            inline_string(Start, Rest, Parts, Same, Acc);
 
         [C | Rest] when ?UNICODE(C) ->
-            inline_string(Start, Rest, Acc);
+            inline_string(Start, Rest, Parts, Same, Acc);
 
         [G | Rest] when is_list(G) ->
-            inline_string(Start, Rest, Acc);
+            inline_string(Start, Rest, Parts, Same, Acc);
 
         _ ->
-            String = between(Start, Binary),
-            inline_byte(Binary, [String | Acc], string)
+            String = {Same, between(Start, Binary)},
+            inline_byte(Binary, Parts, Same, [String | Acc], string)
     end.
 
 %-----------------------------------------------------------------------
 
-inline_byte(Binary, Acc, empty) ->
-    inline_byte(Binary, [<<"<<">> | Acc]);
-inline_byte(Binary, Acc, byte) ->
-    inline_byte(Binary, [<<",">> | Acc]);
-inline_byte(Binary, Acc, string) ->
-    inline_byte(Binary, [<<"\",">> | Acc]).
+inline_byte(Binary, Parts, Same, Acc, empty) ->
+    inline_byte(Binary, Parts, Same, [<<"<<">> | Acc]);
+inline_byte(Binary, Parts, Same, Acc, byte) ->
+    inline_byte(Binary, Parts, Same, [<<",">> | Acc]);
+inline_byte(Binary, Parts, Same, Acc, string) ->
+    inline_byte(Binary, Parts, Same, [<<"\",">> | Acc]).
 
 %-----------------------------------------------------------------------
 
-inline_byte(Binary, Acc) ->
+inline_byte(Binary, Parts, Same, Acc) ->
     {_, B, Rest} = byte(Binary),
-    inline(Rest, [B | Acc], byte).
+    inline(Rest, Parts, Same, [{Same, B} | Acc], byte).
 
 %=======================================================================
 
@@ -197,17 +226,21 @@ inline_byte(Binary, Acc) ->
 % >>
 % ^^^^^^
 
-styled(W, Binary) when W >= 6 ->
-    styled(W, Binary, [], {W, []}, empty).
+-record(styled, {
+          width :: pos_integer(),
+          lines :: list(),
+          part :: same | diff,
+          parts :: list()
+         }).
+
+styled(W, [Part | Parts]) when W >= 6 ->
+    Lines = #styled{width = W, lines = [], part = same, parts = Parts},
+    styled(W, Part, [], Lines, empty).
 
 %-----------------------------------------------------------------------
 
-styled(_, <<>>, Line, Lines, newline) ->
-    styled_end(Line, Lines);
-styled(_, <<>>, Line, Lines, byte) ->
-    styled_end(Line, Lines);
-styled(_, <<>>, Line, Lines, string) ->
-    styled_end([<<"\"">> | Line], Lines);
+styled(W, <<>>, Line, Lines, Mode) ->
+    styled_part(W, Line, Lines, Mode);
 styled(W, <<C, Rest/binary>>, Line, Lines, Mode)
         when ?ESCAPED(C) ->
     styled_escape(W, C, Rest, Line, Lines, Mode);
@@ -233,13 +266,15 @@ styled_escape(W, C, Rest, [], Lines, empty) ->
 styled_escape(W, C, Rest, [], Lines, newline) ->
     styled_escape_next(W - 3, C, Rest, [<<", \"">>], Lines);
 styled_escape(W, C, Rest, Line, Lines, byte) when W < 5 ->
-    Lines1 = {WW, _} = styled_newline(Line, Lines),
-    styled_escape_next(WW - 3, C, Rest, [<<", \"">>], Lines1);
+    Lines1 = styled_newline(Line, Lines),
+    Width = Lines1#styled.width,
+    styled_escape_next(Width - 3, C, Rest, [<<", \"">>], Lines1);
 styled_escape(W, C, Rest, Line, Lines, byte) ->
     styled_escape_next(W - 2, C, Rest, [<<",\"">> | Line], Lines);
 styled_escape(W, C, Rest, Line, Lines, string) when W < 3 ->
-    Lines1 = {WW, _} = styled_newline([<<"\"">> | Line], Lines),
-    styled_escape_next(WW - 3, C, Rest, [<<", \"">>], Lines1);
+    Lines1 = styled_newline([<<"\"">> | Line], Lines),
+    Width = Lines1#styled.width,
+    styled_escape_next(Width - 3, C, Rest, [<<", \"">>], Lines1);
 styled_escape(W, C, Rest, Line, Lines, string) ->
     styled_escape_next(W, C, Rest, Line, Lines).
 
@@ -247,11 +282,14 @@ styled_escape(W, C, Rest, Line, Lines, string) ->
 
 styled_escape_next(_, C, Rest, Line, Lines) when C =:= $\n ->
     Escape = escape(C),
-    Lines1 = {WW, _} = styled_newline([<<"\"">>, Escape | Line], Lines),
-    styled(WW, Rest, [], Lines1, newline);
+    Line1 = styled_text(Escape, Line, Lines),
+    Lines1 = styled_newline([<<"\"">> | Line1], Lines),
+    Width = Lines1#styled.width,
+    styled(Width, Rest, [], Lines1, newline);
 styled_escape_next(W, C, Rest, Line, Lines) ->
     Escape = escape(C),
-    styled(W - 2, Rest, [Escape | Line], Lines, string).
+    Line1 = styled_text(Escape, Line, Lines),
+    styled(W - 2, Rest, Line1, Lines, string).
 
 %-----------------------------------------------------------------------
 
@@ -260,13 +298,15 @@ styled_string(W, Start, Stop, [], Lines, empty) ->
 styled_string(W, Start, Stop, [], Lines, newline) ->
     styled_string_rest(W - 4, Start, Stop, [<<", \"">>], Lines);
 styled_string(W, Start, Stop, Line, Lines, byte) when W < 4 ->
-    Lines1 = {WW, _} = styled_newline(Line, Lines),
-    styled_string_rest(WW - 4, Start, Stop, [<<", \"">>], Lines1);
+    Lines1 = styled_newline(Line, Lines),
+    Width = Lines1#styled.width,
+    styled_string_rest(Width - 4, Start, Stop, [<<", \"">>], Lines1);
 styled_string(W, Start, Stop, Line, Lines, byte) ->
     styled_string_rest(W - 3, Start, Stop, [<<",\"">> | Line], Lines);
 styled_string(W, Start, Stop, Line, Lines, string) when W < 2 ->
-    Lines1 = {WW, _} = styled_newline([<<"\"">> | Line], Lines),
-    styled_string_rest(WW - 4, Start, Stop, [<<", \"">>], Lines1);
+    Lines1 = styled_newline([<<"\"">> | Line], Lines),
+    Width = Lines1#styled.width,
+    styled_string_rest(Width - 4, Start, Stop, [<<", \"">>], Lines1);
 styled_string(W, Start, Stop, Line, Lines, string) ->
     styled_string_rest(W - 1, Start, Stop, Line, Lines).
 
@@ -274,19 +314,23 @@ styled_string(W, Start, Stop, Line, Lines, string) ->
 
 styled_string_next(W, Start, Stop, Rest, Line, Lines) when W < 2 ->
     String = between(Start, Stop),
-    Lines1 = {WW, _} = styled_newline([<<"\"">>, String | Line], Lines),
-    styled_string_rest(WW - 4, Stop, Rest, [<<", \"">>], Lines1);
+    Line1 = styled_text(String, Line, Lines),
+    Lines1 = styled_newline([<<"\"">> | Line1], Lines),
+    Width = Lines1#styled.width,
+    styled_string_rest(Width - 4, Stop, Rest, [<<", \"">>], Lines1);
 styled_string_next(W, Start, _, Rest, Line, Lines) ->
     styled_string_rest(W - 1, Start, Rest, Line, Lines).
 
 %-----------------------------------------------------------------------
 
-styled_string_rest(_, Start, [], Line, Lines) ->
-    styled_end([<<"\"">>, Start | Line], Lines);
+styled_string_rest(W, Start, [], Line, Lines) ->
+    Line1 = styled_text(Start, Line, Lines),
+    styled_part(W, Line1, Lines, string);
 styled_string_rest(W, Start, Binary = <<C, Rest/binary>>, Line, Lines)
         when ?ESCAPED(C) ->
     String = between(Start, Binary),
-    styled_escape(W, C, Rest, [String | Line], Lines, string);
+    Line1 = styled_text(String, Line, Lines),
+    styled_escape(W, C, Rest, Line1, Lines, string);
 styled_string_rest(W, Start, Binary, Line, Lines) ->
     case string:next_grapheme(Binary) of
         [C, Rest] when ?UNICODE(C) ->
@@ -300,49 +344,80 @@ styled_string_rest(W, Start, Binary, Line, Lines) ->
 
         _ ->
             String = between(Start, Binary),
-            styled_byte(W, Binary, [String | Line], Lines, string)
+            Line1 = styled_text(String, Line, Lines),
+            styled_byte(W, Binary, Line1, Lines, string)
     end.
 
 %-----------------------------------------------------------------------
 
 styled_byte(W, Binary, [], Lines, empty) ->
-    {L, B, Rest} = byte(Binary),
-    styled(W - 2 - L, Rest, [B, <<"<<">>], Lines, byte);
+    Byte = byte(Binary),
+    styled_byte_next(W - 2, Byte, [<<"<<">>], Lines);
 styled_byte(W, Binary, [], Lines, newline) ->
-    {L, B, Rest} = byte(Binary),
-    styled(W - 2 - L, Rest, [B, <<", ">>], Lines, byte);
+    Byte = byte(Binary),
+    styled_byte_next(W - 2, Byte, [<<", ">>], Lines);
 styled_byte(W, Binary, Line, Lines, byte) ->
-    {L, B, Rest} = byte(Binary),
+    Byte = {L, _, _} = byte(Binary),
     if W < L + 1 ->
-            Lines1 = {WW, _} = styled_newline(Line, Lines),
-            styled(WW - 2 - L, Rest, [B, <<", ">>], Lines1, byte);
+            Lines1 = styled_newline(Line, Lines),
+            Width = Lines1#styled.width,
+            styled_byte_next(Width - 2, Byte, [<<", ">>], Lines1);
 
        true ->
-            styled(W - 1 - L, Rest, [B, <<",">> | Line], Lines, byte)
+            styled_byte_next(W - 1, Byte, [<<",">> | Line], Lines)
     end;
 styled_byte(W, Binary, Line, Lines, string) ->
-    {L, B, Rest} = byte(Binary),
+    Byte = {L, _, _} = byte(Binary),
     if W < L + 2 ->
-            Lines1 = {WW, _} = styled_newline([<<"\"">> | Line], Lines),
-            styled(WW - 2 - L, Rest, [B, <<", ">>], Lines1, byte);
+            Lines1 = styled_newline([<<"\"">> | Line], Lines),
+            Width = Lines1#styled.width,
+            styled_byte_next(Width - 2, Byte, [<<", ">>], Lines1);
 
        true ->
-            styled(W - 2 - L, Rest, [B, <<"\",">> | Line], Lines, byte)
+            styled_byte_next(W - 2, Byte, [<<"\",">> | Line], Lines)
     end.
 
 %-----------------------------------------------------------------------
 
-styled_newline(Line, {W, []}) ->
-    {W, [lists:reverse(Line)]};
-styled_newline(Line, {W, Lines}) ->
-    {W, [lists:reverse(Line), newline | Lines]}.
+styled_byte_next(W, {L, B, Rest}, Line, Lines) ->
+    Line1 = styled_text(B, Line, Lines),
+    styled(W - L, Rest, Line1, Lines, byte).
 
 %-----------------------------------------------------------------------
 
-styled_end([], {_, Lines}) ->
+styled_text(Text, Line, #styled{part = Same}) ->
+    [{Same, Text} | Line].
+
+%-----------------------------------------------------------------------
+
+styled_newline(Line, Lines = #styled{lines = []}) ->
+    Lines#styled{lines = [Line]};
+styled_newline(Line, Lines = #styled{lines = Lines0}) ->
+    Lines#styled{lines = [Line, newline | Lines0]}.
+
+%-----------------------------------------------------------------------
+
+styled_part(_, Line, Lines = #styled{parts = []}, newline) ->
+    styled_end(Line, Lines);
+styled_part(_, Line, Lines = #styled{parts = []}, byte) ->
+    styled_end(Line, Lines);
+styled_part(_, Line, Lines = #styled{parts = []}, string) ->
+    styled_end([<<"\"">> | Line], Lines);
+styled_part(W, Line, Lines = #styled{part = same}, Mode) ->
+    [Part | Parts] = Lines#styled.parts,
+    styled(W, Part, Line, Lines#styled{part = diff, parts = Parts}, Mode);
+styled_part(W, Line, Lines = #styled{part = diff}, Mode) ->
+    [Part | Parts] = Lines#styled.parts,
+    styled(W, Part, Line, Lines#styled{part = same, parts = Parts}, Mode).
+
+%-----------------------------------------------------------------------
+
+styled_end([], #styled{lines = Lines}) ->
     [<<">>">>, newline | Lines];
-styled_end(Line, {_, Lines}) ->
-    [<<">>">>, newline, lists:reverse(Line), newline | Lines].
+styled_end(Line, #styled{lines = []}) ->
+    [<<">>">>, newline, Line];
+styled_end(Line, #styled{lines = Lines}) ->
+    [<<">>">>, newline, Line, newline | Lines].
 
 %=======================================================================
 
@@ -369,7 +444,7 @@ size_of_byte(N) when N < 10 ->
     1;
 size_of_byte(N) when N < 100 ->
     2;
-size_of_byte(N) ->
+size_of_byte(_) ->
     3.
 
 %-----------------------------------------------------------------------
@@ -393,23 +468,30 @@ byte(<<N, Rest/binary>>) ->
 
 inline_1_test_() ->
     Binary = <<"Hello\"\n",0>>,
-    Same = diff,
-    Sized = {binary, Same, 17, Binary},
+    Same = same,
+    Parts = [Binary],
+    Sized = {binary, Same, 17, Parts},
     Inline =
-        [ <<"<<\"">>, <<"Hello">>, <<"\\\"">>, <<"\\n">>
-        , <<"\",">>, <<"0">>, <<">>">>],
+        [ <<">>">>
+        , {same, <<"0">>}
+        , <<"\",">>
+        , {same, <<"\\n">>}
+        , {same, <<"\\\"">>}
+        , {same, <<"Hello">>}
+        , <<"<<\"">>
+        ],
     Styled =
         [ <<">>">>
         , newline
-        , [<<", ">>, <<"0">>]
+        , [{same, <<"0">>}, <<", ">>]
         , newline
-        , [<<", \"">>, <<"\\\"">>, <<"\\n">>, <<"\"">>]
+        , [<<"\"">>, {same, <<"\\n">>}, {same, <<"\\\"">>}, <<", \"">>]
         , newline
-        , [<<"<<\"">>, <<"Hello">>, <<"\"">>]
+        , [<<"\"">>, {same, <<"Hello">>}, <<"<<\"">>]
         ],
     [ ?_assertEqual(Sized, sized(Same, Binary))
-    , ?_assertEqual(Inline, inline(Binary))
-    , ?_assertEqual(Styled, styled(10, Binary))
+    , ?_assertEqual(Inline, inline(Parts))
+    , ?_assertEqual(Styled, styled(10, Parts))
     ].
 
 %-----------------------------------------------------------------------
@@ -417,74 +499,98 @@ inline_1_test_() ->
 inline_2_test_() ->
     Binary = <<15, 200, "\e[0m">>,
     Same = diff,
-    Sized = {binary, Same, 18, Binary},
+    Parts = [<<>>, Binary],
+    Sized = {binary, Same, 18, Parts},
     Inline =
-        [ <<"<<">>, <<"15">>
-        , <<",">>, <<"200">>
-        , <<",\"">>, <<"\\e">>, <<"[0m">>, <<"\">>">>
+        [ <<"\">>">>
+        , {diff, <<"[0m">>}
+        , {diff, <<"\\e">>}
+        , <<",\"">>
+        , {diff, <<"200">>}
+        , <<",">>
+        , {diff, <<"15">>}
+        , <<"<<">>
         ],
     Styled =
         [ <<">>">>
         , newline
-        , [<<", \"">>, <<"\\e">>, <<"[0m">>, <<"\"">>]
+        , [<<"\"">>, {diff, <<"[0m">>}, {diff, <<"\\e">>}, <<", \"">>]
         , newline
-        , [<<"<<">>, <<"15">>, <<",">>, <<"200">>]
+        , [{diff, <<"200">>}, <<",">>, {diff, <<"15">>}, <<"<<">>]
         ],
     [ ?_assertEqual(Sized, sized(Same, Binary))
-    , ?_assertEqual(Inline, inline(Binary))
-    , ?_assertEqual(Styled, styled(10, Binary))
+    , ?_assertEqual(Inline, inline(Parts))
+    , ?_assertEqual(Styled, styled(10, Parts))
     ].
 
 %-----------------------------------------------------------------------
 
 inline_3_test_() ->
     Binary = <<"\be", 5, "xt\n">>,
-    Same = diff,
-    Sized = {binary, Same, 18, Binary},
+    Same = same,
+    Parts = [Binary],
+    Sized = {binary, Same, 18, Parts},
     Inline =
-        [ <<"<<\"">>, <<"\\b">>, <<"e">>
-        , <<"\",">>, <<"5">>
-        , <<",\"">>, <<"xt">>, <<"\\n">>, <<"\">>">>
+        [ <<"\">>">>
+        , {same, <<"\\n">>}
+        , {same, <<"xt">>}
+        , <<",\"">>
+        , {same, <<"5">>}
+        , <<"\",">>
+        , {same, <<"e">>}
+        , {same, <<"\\b">>}
+        , <<"<<\"">>
         ],
     Styled =
         [ <<">>">>
         , newline
-        , [<<", \"">>, <<"xt">>, <<"\\n">>, <<"\"">>]
+        , [<<"\"">>, {same, <<"\\n">>}, {same, <<"xt">>}, <<", \"">>]
         , newline
-        , [<<"<<\"">>, <<"\\b">>, <<"e">>, <<"\",">>, <<"5">>]
+        , [ {same, <<"5">>}
+          , <<"\",">>
+          , {same, <<"e">>}
+          , {same, <<"\\b">>}
+          , <<"<<\"">>
+          ]
         ],
     [ ?_assertEqual(Sized, sized(Same, Binary))
-    , ?_assertEqual(Inline, inline(Binary))
-    , ?_assertEqual(Styled, styled(10, Binary))
+    , ?_assertEqual(Inline, inline(Parts))
+    , ?_assertEqual(Styled, styled(10, Parts))
     ].
 
 %-----------------------------------------------------------------------
 
 vertical_1_test_() ->
-    Binary = <<"Hello\n", 0, "World\n", 0>>,
+    Binary = [<<"Hello\n">>, <<0, "World\n">>, <<0>>],
     Expect =
       [ <<">>">>
       , newline
-      , [<<", ">>, <<"0">>]
+      , [{same, <<"0">>}, <<", ">>]
       , newline
-      , [<<", ">>, <<"0">>, <<",\"">>, <<"World">>, <<"\\n">>, <<"\"">>]
+      , [ <<"\"">>
+        , {diff, <<"\\n">>}
+        , {diff, <<"World">>}
+        , <<",\"">>
+        , {diff, <<"0">>}
+        , <<", ">>
+        ]
       , newline
-      , [<<"<<\"">>, <<"Hello">>, <<"\\n">>, <<"\"">>]
+      , [<<"\"">>, {same, <<"\\n">>}, {same, <<"Hello">>}, <<"<<\"">>]
       ],
     Squash =
       [ <<">>">>
       , newline
-      , [<<", ">>, <<"0">>]
+      , [{same, <<"0">>}, <<", ">>]
       , newline
-      , [<<", \"">>, <<"\\n">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"\\n">>}, <<", \"">>]
       , newline
-      , [<<", \"">>, <<"rld">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"rld">>}, <<", \"">>]
       , newline
-      , [<<", ">>, <<"0">>, <<",\"">>, <<"Wo">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"Wo">>}, <<",\"">>, {diff, <<"0">>}, <<", ">>]
       , newline
-      , [<<", \"">>, <<"o">>, <<"\\n">>, <<"\"">>]
+      , [<<"\"">>, {same, <<"\\n">>}, {same, <<"o">>}, <<", \"">>]
       , newline
-      , [<<"<<\"">>, <<"Hell">>, <<"\"">>]
+      , [<<"\"">>, {same, <<"Hell">>}, <<"<<\"">>]
       ],
     [ ?_assertEqual(Expect, styled(15, Binary))
     , ?_assertEqual(Squash, styled(8, Binary))
@@ -497,20 +603,89 @@ vertical_2_test_() ->
     Expect =
       [ <<">>">>
       , newline
-      , [<<", ">>, <<"200">>, <<",\"">>, <<"\\t">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"\\t">>}, <<",\"">>, {diff, <<"200">>}, <<", ">>]
       , newline
-      , [<<", ">>, <<"200">>, <<",">>, <<"0">>]
+      , [{diff, <<"0">>}, <<",">>, {diff, <<"200">>}, <<", ">>]
       , newline
-      , [<<", \"">>, <<"\\v">>, <<"Two">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"Two">>}, {diff, <<"\\v">>}, <<", \"">>]
       , newline
-      , [<<", \"">>, <<"x">>, <<"\\n">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"\\n">>}, {diff, <<"x">>}, <<", \"">>]
       , newline
-      , [<<", \"">>, <<"Bold">>, <<"\\n">>, <<"\"">>]
+      , [<<"\"">>, {diff, <<"\\n">>}, {diff, <<"Bold">>}, <<", \"">>]
       , newline
-      , [ <<"<<">>, <<"0">>, <<",\"">>, <<"\\\\">>, <<"\\f">>, <<"\"">>]
+      , [ <<"\"">>
+        , {diff, <<"\\f">>}
+        , {diff, <<"\\\\">>}
+        , <<",\"">>
+        , {diff, <<"0">>}
+        , <<"<<">>
+        ]
       ],
-    [ ?_assertEqual(Expect, styled(10, Binary))
+    [ ?_assertEqual(Expect, styled(10, [<<>>, Binary]))
     ].
+
+%-----------------------------------------------------------------------
+
+black_cat_test() ->
+    OldBinary = <<"The black cat in the hat?">>,
+    NewBinary = <<"The cat in the black hat!">>,
+    {OldDiff, NewDiff} = solarized_binary_diff:diff(OldBinary, NewBinary),
+    OldInline =
+        [ <<"\">>">>
+        , {diff, <<"?">>}
+        , {same, <<"hat">>}
+        , {same, <<"cat in the ">>}
+        , {diff, <<"black ">>}
+        , {same, <<"The ">>}
+        , <<"<<\"">>
+        ],
+    NewInline =
+        [ <<"\">>">>
+        , {diff, <<"!">>}
+        , {same, <<"hat">>}
+        , {diff, <<"k ">>}
+        , {diff, <<"blac">>}
+        , {same, <<"cat in the ">>}
+        , {same, <<"The ">>}
+        , <<"<<\"">>
+        ],
+    OldStyled =
+        [ <<">>">>
+        , newline
+        , [ <<"\"">>
+          , {diff, <<"?">>}
+          , {same, <<"hat">>}
+          , {same, <<" the ">>}
+          , <<", \"">>
+          ]
+        , newline
+        , [ <<"\"">>
+          , {same, <<"cat in">>}
+          , {diff, <<"black ">>}
+          , {same, <<"The ">>}
+          , <<"<<\"">>
+          ]
+        ],
+    NewStyled =
+        [ <<">>">>
+        , newline
+        , [ <<"\"">>
+          , {diff, <<"!">>}
+          , {same, <<"hat">>}
+          , {diff, <<"k ">>}
+          , {diff, <<"blac">>}
+          , {same, <<"cat in the ">>}
+          , {same, <<"The ">>}
+          , <<"<<\"">>
+          ]
+        ],
+    ?assertEqual(OldInline, solarized_binary:inline(OldDiff)),
+    ?assertEqual(NewInline, solarized_binary:inline(NewDiff)),
+    ?assertEqual(OldStyled, solarized_binary:styled(20, OldDiff)),
+    ?assertEqual(NewStyled, solarized_binary:styled(30, NewDiff)).
+
+
+%-----------------------------------------------------------------------
 
 -endif.
 
