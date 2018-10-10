@@ -366,7 +366,16 @@ report_exception_class(exit, Reason) ->
 report_exception_error({assert, Props}) when is_list(Props) ->
     Expression = proplists:get_value(expression, Props),
     Expected = proplists:get_value(expected, Props),
-    Value = proplists:get_value(not_boolean, Props),
+    Value = case proplists:get_value(value, Props) of
+        true ->
+            true;
+
+        false ->
+            false;
+
+        undefined ->
+            proplists:get_value(not_boolean, Props)
+    end,
     solarized:text(<<"assertion:\n">>),
     solarized:red(<<"  ?assert(_, ">>),
     solarized:text("~ts", [Expression]),
