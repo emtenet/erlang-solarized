@@ -451,7 +451,7 @@ styled(FirstStyling, RestStyling, W, Diffed) ->
 %-----------------------------------------------------------------------
 
 styled(Styling, _I, _W, Acc, {scalar, Same, _, Text}) ->
-    styled_text(Styling, Same, Text, Acc);
+    styled_text(Styling, Same, Acc, Text);
 styled(Styling, _I, W, Acc, Diffed = {_, _, L, _}) when L =< W ->
     styled_inline(Styling, Acc, Diffed);
 styled(Styling, I, W, Acc, {list, Same, _, Items}) ->
@@ -479,13 +479,13 @@ styled_binary_lines(Styling, I, Same, Acc0, [newline | Lines]) ->
     Acc1 = styled_newline(Styling, I, Acc0),
     styled_binary_lines(Styling, I, Same, Acc1, Lines);
 styled_binary_lines(Styling, I, Same, Acc0, [Line | Lines]) ->
-    Acc1 = styled_text(Styling, Same, Line, Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, Line),
     styled_binary_lines(Styling, I, Same, Acc1, Lines).
 
 %=======================================================================
 
 styled_inline(Styling, Acc, {scalar, Same, _, Text}) ->
-    styled_text(Styling, Same, Text, Acc);
+    styled_text(Styling, Same, Acc, Text);
 styled_inline(Styling, Acc, {list, Same, _, Items}) ->
     styled_inline_items(Styling, Same, $[, $], Acc, Items);
 styled_inline(Styling, Acc, {improper, Same, _, Items}) ->
@@ -501,14 +501,14 @@ styled_inline(Styling, Acc, {binary, Same, _, Binary}) ->
 
 styled_inline_binary(Styling, Same, Acc, Binary) ->
     Text = solarized_binary:inline(Binary),
-    styled_text(Styling, Same, Text, Acc).
+    styled_text(Styling, Same, Acc, Text).
 
 %-----------------------------------------------------------------------
 
 styled_inline_items(Styling, Same, Open, Close, Acc0, Items) ->
-    Acc1 = styled_text(Styling, Same, Close, Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, Close),
     Acc2 = styled_inline_item(Styling, Same, Acc1, Items),
-    styled_text(Styling, Same, Open, Acc2).
+    styled_text(Styling, Same, Acc2, Open).
 
 %-----------------------------------------------------------------------
 
@@ -516,24 +516,24 @@ styled_inline_item(Styling, _, Acc, [Item]) ->
     styled_inline(Styling, Acc, Item);
 styled_inline_item(Styling, Same, Acc0, [Item | Items]) ->
     Acc1 = styled_inline(Styling, Acc0, Item),
-    Acc2 = styled_text(Styling, Same, <<", ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<", ">>),
     styled_inline_item(Styling, Same, Acc2, Items).
 
 %-----------------------------------------------------------------------
 
 styled_inline_improper(Styling, Same, Acc0, [Item | Items]) ->
-    Acc1 = styled_text(Styling, Same, $], Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, $]),
     Acc2 = styled_inline(Styling, Acc1, Item),
-    Acc3 = styled_text(Styling, Same, <<" | ">>, Acc2),
+    Acc3 = styled_text(Styling, Same, Acc2, <<" | ">>),
     Acc4 = styled_inline_item(Styling, Same, Acc3, Items),
-    styled_text(Styling, Same, $[, Acc4).
+    styled_text(Styling, Same, Acc4, $[).
 
 %-----------------------------------------------------------------------
 
 styled_inline_map(Styling, Same, Acc0, Items) ->
-    Acc1 = styled_text(Styling, Same, $}, Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, $}),
     Acc2 = styled_inline_pairs(Styling, Same, Acc1, Items),
-    styled_text(Styling, Same, <<"#{">>, Acc2).
+    styled_text(Styling, Same, Acc2, <<"#{">>).
 
 %-----------------------------------------------------------------------
 
@@ -541,20 +541,20 @@ styled_inline_pairs(Styling, Same, Acc, [Item]) ->
     styled_inline_pair(Styling, Same, Acc, Item);
 styled_inline_pairs(Styling, Same, Acc0, [Item | Items]) ->
     Acc1 = styled_inline_pair(Styling, Same, Acc0, Item),
-    Acc2 = styled_text(Styling, Same, <<", ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<", ">>),
     styled_inline_pairs(Styling, Same, Acc2, Items).
 
 %-----------------------------------------------------------------------
 
 styled_inline_pair(Styling, Same, Acc0, {pair, _, Key, Value}) ->
     Acc1 = styled_inline(Styling, Acc0, Value),
-    Acc2 = styled_text(Styling, Same, <<" => ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<" => ">>),
     styled_inline(Styling, Acc2, Key).
 
 %=======================================================================
 
 styled_items(Styling, I, W, Same, Open, Close, Acc0, Items) ->
-    Acc1 = styled_text(Styling, Same, Close, Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, Close),
     Acc2 = styled_newline(Styling, I, Acc1),
     styled_items(Styling, I, W, Same, Open, Acc2, Items).
 
@@ -562,13 +562,13 @@ styled_items(Styling, I, W, Same, Open, Close, Acc0, Items) ->
 
 styled_items(Styling, I, W, Same, <<"{ ">>, Acc0, [Item = {scalar, _, _, _}]) ->
     Acc1 = styled_item(Styling, I + 1, W - 1, Acc0, Item),
-    styled_text(Styling, Same, ${, Acc1);
+    styled_text(Styling, Same, Acc1, ${);
 styled_items(Styling, I, W, Same, Open, Acc0, [Item]) ->
     Acc1 = styled_item(Styling, I + 2, W - 2, Acc0, Item),
-    styled_text(Styling, Same, Open, Acc1);
+    styled_text(Styling, Same, Acc1, Open);
 styled_items(Styling, I, W, Same, Open, Acc0, [Item | Items]) ->
     Acc1 = styled_item(Styling, I + 2, W - 2, Acc0, Item),
-    Acc2 = styled_text(Styling, Same, <<", ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<", ">>),
     Acc3 = styled_newline(Styling, I, Acc2),
     styled_items(Styling, I, W, Same, Open, Acc3, Items).
 
@@ -580,17 +580,17 @@ styled_item(Styling, I, W, Acc, Item) ->
 %=======================================================================
 
 styled_improper(Styling, I, W, Same, Acc0, [Item | Items]) ->
-    Acc1 = styled_text(Styling, Same, $], Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, $]),
     Acc2 = styled_newline(Styling, I, Acc1),
     Acc3 = styled_item(Styling, I + 2, W - 2, Acc2, Item),
-    Acc4 = styled_text(Styling, Same, <<"| ">>, Acc3),
+    Acc4 = styled_text(Styling, Same, Acc3, <<"| ">>),
     Acc5 = styled_newline(Styling, I, Acc4),
     styled_items(Styling, I, W, Same, <<"[ ">>, Acc5, Items).
 
 %=======================================================================
 
 styled_map(Styling, I, W, Acc0, {map, Same, _, Pairs}) ->
-    Acc1 = styled_text(Styling, Same, $}, Acc0),
+    Acc1 = styled_text(Styling, Same, Acc0, $}),
     Acc2 = styled_newline(Styling, I, Acc1),
     styled_pairs(Styling, I, W, Same, Acc2, Pairs).
 
@@ -598,10 +598,10 @@ styled_map(Styling, I, W, Acc0, {map, Same, _, Pairs}) ->
 
 styled_pairs(Styling, I, W, Same, Acc0, [{pair, _, K, V}]) ->
     Acc1 = styled_pair(Styling, I + 2, W - 2, Same, Acc0, K, V),
-    styled_text(Styling, Same, <<"#{">>, Acc1);
+    styled_text(Styling, Same, Acc1, <<"#{">>);
 styled_pairs(Styling, I, W, Same, Acc0, [{pair, _, K, V} | Pairs]) ->
     Acc1 = styled_pair(Styling, I + 2, W - 2, Same, Acc0, K, V),
-    Acc2 = styled_text(Styling, Same, <<", ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<", ">>),
     Acc3 = styled_newline(Styling, I, Acc2),
     styled_pairs(Styling, I, W, Same, Acc3, Pairs).
 
@@ -610,35 +610,35 @@ styled_pairs(Styling, I, W, Same, Acc0, [{pair, _, K, V} | Pairs]) ->
 styled_pair(Styling, I, W, Same, Acc0, K = {_, _, L, _}, V)
         when (L * 3) =< W andalso L rem 2 == 0 ->
     Acc1 = styled(Styling, I + L + 4, W - L - 4, Acc0, V),
-    Acc2 = styled_text(Styling, Same, <<" => ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<" => ">>),
     styled_inline(Styling, Acc2, K);
 styled_pair(Styling, I, W, Same, Acc0, K = {_, _, L, _}, V)
         when (L * 3) =< W ->
     Acc1 = styled(Styling, I + L + 5, W - L - 5, Acc0, V),
-    Acc2 = styled_text(Styling, Same, <<"  => ">>, Acc1),
+    Acc2 = styled_text(Styling, Same, Acc1, <<"  => ">>),
     styled_inline(Styling, Acc2, K);
 styled_pair(Styling, I, W, Same, Acc0, K, V) ->
     Acc1 = styled(Styling, I, W, Acc0, V),
     Acc2 = styled_newline(Styling, I, Acc1),
-    Acc3 = styled_text(Styling, Same, <<" =>">>, Acc2),
+    Acc3 = styled_text(Styling, Same, Acc2, <<" =>">>),
     styled(Styling, I, W, Acc3, K).
 
 %=======================================================================
 
-styled_text(_, Same, Text, Acc) when is_list(Acc) ->
+styled_text(_, Same, Acc, Text) when is_list(Acc) ->
     {Same, Text, Acc};
-styled_text(_, Same, Text, {Same, Texts, Acc})
+styled_text(_, Same, {Same, Texts, Acc}, Text)
         when is_integer(Texts) orelse is_binary(Texts) ->
     {Same, [Text, Texts], Acc};
-styled_text(_, Same, Text, {Same, Texts, Acc}) ->
+styled_text(_, Same, {Same, Texts, Acc}, Text) ->
     {Same, [Text | Texts], Acc};
-styled_text({_, _, text}, same, Text, {_, Texts, Acc}) ->
+styled_text({_, _, text}, same, {_, Texts, Acc}, Text) ->
     {same, Text, [Texts | Acc]};
-styled_text({_, _, Diff}, same, Text, {_, Texts, Acc}) ->
+styled_text({_, _, Diff}, same, {_, Texts, Acc}, Text) ->
     {same, Text, [{Diff, Texts} | Acc]};
-styled_text({_, text, _}, diff, Text, {_, Texts, Acc}) ->
+styled_text({_, text, _}, diff, {_, Texts, Acc}, Text) ->
     {diff, Text, [Texts | Acc]};
-styled_text({_, Same, _}, diff, Text, {_, Texts, Acc}) ->
+styled_text({_, Same, _}, diff, {_, Texts, Acc}, Text) ->
     {diff, Text, [{Same, Texts} | Acc]}.
 
 %=======================================================================
@@ -646,7 +646,7 @@ styled_text({_, Same, _}, diff, Text, {_, Texts, Acc}) ->
 styled_newline(Styling, 0, Acc) ->
     styled_newline_acc(Styling, Acc);
 styled_newline(Styling, I, Acc0) ->
-    Acc1 = styled_text(Styling, same, indent_n(I), Acc0),
+    Acc1 = styled_text(Styling, same, Acc0, indent_n(I)),
     styled_newline_acc(Styling, Acc1).
 
 %-----------------------------------------------------------------------
