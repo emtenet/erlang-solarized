@@ -46,8 +46,8 @@ output_equal_to_file(App, File, Test, Columns, Rows)
 %=======================================================================
 
 check_equal_to_file(App, File, Output) ->
-    BaseDir = code:lib_dir(App, tests),
-    ok = ensure_tests_dir(BaseDir),
+    BaseDir = code:lib_dir(App, test),
+    ok = ensure_test_dir(BaseDir),
     BaseFile = filename:join(BaseDir, File),
     ExpectFile = [BaseFile, ".expect"],
     OutputFile = [BaseFile, ".output"],
@@ -63,8 +63,8 @@ check_equal_to_file(App, File, Output) ->
 
 %=======================================================================
 
-ensure_tests_dir(TestsDir) ->
-    case file:make_dir(TestsDir) of
+ensure_test_dir(TestDir) ->
+    case file:make_dir(TestDir) of
         ok ->
             ok;
 

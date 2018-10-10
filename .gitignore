@@ -13,3 +13,4 @@ ebin/*
 solarized.d
 cover/*
 *.coverdata
+test/ct.cover.spec
