@@ -363,74 +363,138 @@ report_exception_class(exit, Reason) ->
 
 %-----------------------------------------------------------------------
 
+report_exception_error({outputEqualToFile, Props}) when is_list(Props) ->
+    Args = [app, file, expression, columns, rows],
+    report_assertion(outputEqualToFile, Args, Props),
+    report_property_string(<<"expect file">>, green, expect_file, Props),
+    report_property_string(<<"output file">>, orange, output_file, Props);
 report_exception_error({assert, Props}) when is_list(Props) ->
-    Expression = proplists:get_value(expression, Props),
-    Expected = proplists:get_value(expected, Props),
-    Value = case proplists:get_value(value, Props) of
-        true ->
-            true;
+    case proplists:lookup(expected, Props) of
+        {_, true} ->
+            report_assertion(assert, ['_', expression], Props);
 
-        false ->
-            false;
-
-        undefined ->
-            proplists:get_value(not_boolean, Props)
+        {_, false} ->
+            report_assertion(assertNot, ['_', expression], Props)
     end,
-    solarized:text(<<"assertion:\n">>),
-    solarized:red(<<"  ?assert(_, ">>),
-    solarized:text("~ts", [Expression]),
-    solarized:red(<<")\n">>),
-    {E, V} = report_exception_diff(Expected, Value),
-    solarized:text(<<"expected:\n">>),
-    report_exception_styled(E),
-    solarized:text(<<"got:\n">>),
-    report_exception_styled(V);
+    report_property_optional(<<"not boolean">>, orange, not_boolean, Props);
 report_exception_error({assertEqual, Props}) when is_list(Props) ->
-    Expression = proplists:get_value(expression, Props),
-    Expected = proplists:get_value(expected, Props),
-    Value = proplists:get_value(value, Props),
-    solarized:text(<<"assertion:\n">>),
-    solarized:red(<<"  ?assertEqual(_, ">>),
-    solarized:text("~ts", [Expression]),
-    solarized:red(<<")\n">>),
-    {E, V} = report_exception_diff(Expected, Value),
-    solarized:text(<<"expected:\n">>),
-    report_exception_styled(E),
-    solarized:text(<<"got:\n">>),
-    report_exception_styled(V);
+    report_assertion(assertEqual, ['_', expression], Props),
+    {E, G} = report_diff(expected, value, Props),
+    report_diffed(<<"expected">>, E),
+    report_diffed(<<"got">>, G);
 report_exception_error({assertNotEqual, Props}) when is_list(Props) ->
-    Expression = proplists:get_value(expression, Props),
-    Value = proplists:get_value(value, Props),
-    solarized:text(<<"assertion:\n">>),
-    solarized:red(<<"  ?assertNotEqual(_, ">>),
-    solarized:text("~ts", [Expression]),
-    solarized:red(<<")\n">>),
-    solarized:text(<<"NOT expected:\n">>),
-    solarized:term(orange, Value, #{ indent => 2 });
+    report_assertion(assertNotEqual, ['_', expression], Props),
+    report_property(<<"NOT expected">>, orange, value, Props);
+report_exception_error({assertMatch, Props}) when is_list(Props) ->
+    report_assertion(assertMatch, ['_', expression], Props),
+    report_property_string(<<"pattern">>, green, pattern, Props),
+    report_property(<<"got">>, orange, value, Props);
+report_exception_error({assertNotMatch, Props}) when is_list(Props) ->
+    report_assertion(assertNotMatch, ['_', expression], Props),
+    report_property_string(<<"pattern">>, green, pattern, Props),
+    report_property(<<"got">>, orange, value, Props);
 report_exception_error({badmatch, Value}) ->
-    solarized:text(<<"bad match:\n">>),
+    report_header(<<"bad match">>),
     solarized:term(orange, Value, #{ indent => 2 });
 report_exception_error(Reason) ->
-    solarized:text(<<"error:\n">>),
+    report_header(<<"error">>),
     solarized:term(orange, Reason, #{ indent => 2 }).
 
 %-----------------------------------------------------------------------
 
-report_exception_diff(Expected, Value) ->
-    try
-        Options = #{ indent => {comment, bold, <<" |">>}, hanging => false },
-        solarized:diff(green, orange, Expected, Value, Options)
-    catch
-        Class:Reason:Stack ->
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
-            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
-            {[], []}
+report_diff(Left, Right, Props) ->
+    case {proplists:lookup(Left, Props), proplists:lookup(Right, Props)} of
+        {none, none} ->
+            {{missing, Left}, {missing, Right}};
+
+        {none, {_, R}} ->
+            {{missing, Left}, {term, orange, R}};
+
+        {{_, L}, none} ->
+            {{term, green, L}, {missing, Right}};
+
+        {{_, L}, {_, R}} ->
+            try
+                %Options =
+                %    #{ indent => {comment, bold, <<" |">>}
+                %     , hanging => false
+                %     },
+                Options = #{ indent => 2 },
+                {Ld, Rd} = solarized:diff(green, orange, L, R, Options),
+                {{diffed, Ld}, {diffed, Rd}}
+            catch
+                Class:Reason:Stack ->
+                    solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+                    io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+                    solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+                    {{missing, Left}, {missing, Right}}
+            end
     end.
 
 %-----------------------------------------------------------------------
 
-report_exception_styled(Styled) ->
+report_diffed(Header, Diffed) ->
+    report_header(Header),
+    case Diffed of
+        {diffed, Styled} ->
+            report_styled(Styled);
+
+        {term, Style, Term} ->
+            report_term(Style, Term);
+
+        {missing, Key} ->
+            report_string(red, [$? | atom_to_list(Key)])
+    end.
+
+%-----------------------------------------------------------------------
+
+report_property(Header, Style, Key, Props) ->
+    report_header(Header),
+    case proplists:lookup(Key, Props) of
+        {_, Value} ->
+            report_term(Style, Value);
+
+        none ->
+            report_string(red, [$? | atom_to_list(Key)])
+    end.
+
+%-----------------------------------------------------------------------
+
+report_property_string(Header, Style, Key, Props) ->
+    report_header(Header),
+    case proplists:lookup(Key, Props) of
+        {_, Value} ->
+            report_string(Style, Value);
+
+        none ->
+            report_string(red, [$? | atom_to_list(Key)])
+    end.
+
+%-----------------------------------------------------------------------
+
+report_property_optional(Header, Style, Key, Props) ->
+    case proplists:lookup(Key, Props) of
+        {_, Value} ->
+            report_header(Header),
+            report_term(Style, Value);
+
+        none ->
+            ok
+    end.
+
+%-----------------------------------------------------------------------
+
+report_header(Header) ->
+    solarized:text([ Header, <<":\n">>]).
+
+%-----------------------------------------------------------------------
+
+report_string(Style, String) ->
+    report_styled([<<"  ">>, {Style, String}, <<"\n">>]).
+
+%-----------------------------------------------------------------------
+
+report_styled(Styled) ->
     try
         solarized:styled(Styled)
     catch
@@ -441,6 +505,154 @@ report_exception_styled(Styled) ->
             solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
             ok
     end.
+
+%-----------------------------------------------------------------------
+
+report_term(Style, Term) ->
+    try
+        solarized:term(Style, Term, #{ indent => 2 })
+    catch
+        Class:Reason:Stack ->
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            io:format("--- term ---~n~p~n", [Term]),
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            ok
+    end.
+
+%=======================================================================
+
+report_assertion(Assertion, Args, Props) ->
+    try
+        report_assertion_header(Props),
+        Styled =
+            [ <<"  ">>
+            , {red, [$?, atom_to_list(Assertion), $(]}
+            | report_assertion_args(Args, Props)
+            ],
+        solarized:styled(Styled),
+        report_assertion_comment(Props)
+    catch
+        Class:Reason:Stack ->
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            ok
+    end.
+
+%-----------------------------------------------------------------------
+
+report_assertion_header(Props) ->
+    Rest = report_assertion_module(Props),
+    Styled = [<<"assertion">> | Rest],
+    solarized:styled(Styled).
+
+%-----------------------------------------------------------------------
+
+report_assertion_module(Props) ->
+    Rest = report_assertion_line(Props),
+    case proplists:lookup(module, Props) of
+        none ->
+            Rest;
+
+        {_, Module} ->
+            [<<" in ">>, {blue, atom_to_list(Module)} | Rest]
+    end.
+
+%-----------------------------------------------------------------------
+
+report_assertion_line(Props) ->
+    case proplists:lookup(line, Props) of
+        none ->
+            [<<":\n">>];
+
+        {_, Line} ->
+            io_lib:format(" (line ~p):~n", [Line])
+    end.
+
+%-----------------------------------------------------------------------
+
+report_assertion_args([Arg], Props) ->
+    report_assertion_arg(Arg, [{red, <<")">>}, <<"\n">>], Props);
+report_assertion_args([Arg | Args], Props) ->
+    Rest = report_assertion_args(Args, Props),
+    report_assertion_arg(Arg, [{red, <<", ">>} | Rest], Props).
+
+%-----------------------------------------------------------------------
+
+report_assertion_arg('_', Rest, _) ->
+    [{red, $_} | Rest];
+report_assertion_arg(Arg, Rest, Props) ->
+    case proplists:lookup(Arg, Props) of
+        none ->
+            [{red, [$?, atom_to_list(Arg)]} | Rest];
+
+        {_, Value} ->
+            [Value | Rest]
+    end.
+
+%-----------------------------------------------------------------------
+
+report_assertion_comment(Props) ->
+    case proplists:lookup(comment, Props) of
+        none ->
+            ok;
+
+        {_, Comment} ->
+            solarized:text(<<"comment:\n">>),
+            case printable(Comment) of
+                true ->
+                    solarized:styled(
+                        [ <<"  ">>
+                        , {magenta, Comment}
+                        , <<"\n">>
+                        ]);
+
+                false ->
+                    solarized:term(magenta, Comment, #{ indent => 2 })
+            end
+    end.
+
+%-----------------------------------------------------------------------
+
+% based on io_lib:deep_unicode_char_list/1
+% extended to handle UTF8 binaries
+
+-define(PRINTABLE(C),
+    ( (C >= 0 andalso C < 16#D800) orelse
+      (C > 16#DFFF andalso C < 16#FFFE) orelse
+      (C > 16#FFFF andalso C =< 16#10FFFF))).
+
+printable(Binary) when is_binary(Binary) ->
+    printable_binary(Binary, []);
+printable(List) when is_list(List) ->
+    printable_list(List, []);
+printable(_) ->
+    false.
+
+printable_binary(<<C/utf8, Cs/binary>>, More)
+        when ?PRINTABLE(C) ->
+    printable_binary(Cs, More);
+printable_binary(<<>>, [C | More]) ->
+    printable_list(C, More);
+printable_binary(<<>>, []) ->
+    true;
+printable_binary(_, _) ->
+    false.
+
+printable_list([C | Cs], More) when is_binary(C) ->
+    printable_binary(C, [Cs | More]);
+printable_list([C | Cs], More) when is_list(C) ->
+    printable_list(C, [Cs | More]);
+printable_list([C | Cs], More)
+        when is_integer(C) andalso ?PRINTABLE(C) ->
+    printable_list(Cs, More);
+printable_list([], [Cs | More]) ->
+    printable_list(Cs, More);
+printable_list([], []) ->
+    true;
+printable_list(_, _) ->
+    false.
 
 %=======================================================================
 

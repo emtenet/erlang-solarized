@@ -75,12 +75,12 @@ Defined as:
         ?_test(?outputEqual(Expect, Expression, Columns, Rows))).
 ----
 
-== `?outputEqualToFile(App, File, Test__[, Columns, Rows]__)`
+== `?outputEqualToFile(App, File, Test__[, Columns, Rows], [Comment]__)`
 
 When the expected value is large and complex and you are more concerned about
 how it looks rather than how it is encoded, save it as a file in:
 
-* `__App__/tests/__File__.expect`
+* `__AppDir__/test/__File__.expect`
 
 You gain the following benifits:
 
@@ -89,7 +89,7 @@ You gain the following benifits:
 , copy it over `__File__.expect`
 
 The `?outputEqualToFile` macro supports such a work flow.
-Use like:
+For example:
 
 [source,erlang]
 ----
@@ -97,15 +97,16 @@ a_test() ->
     Test = fun () ->
         ...
     end,
-    ?assert(?outputEqualToFile(App, File, Test)).
+    ?outputEqualToFile(App, File, Test).
 ----
 
-Where `__App__` is your application `atom()` to be used by `code:lib_dir(__App__, tests)`.
+Where `__App__` is your application `atom()` to be used
+to lookup `__AppDir__` by `code:lib_dir(__App__, test)`.
 
 Where `__File__` is the base of the following two files:
 
-* `__App__/tests/__File__.expect`
-* `__App__/tests/__File__.output`
+* `__AppDir__/test/__File__.expect`
+* `__AppDir__/test/__File__.output`
 
 The test logic is as follows:
 
@@ -115,6 +116,8 @@ the test *fails* and the captured output is saved to the `.output` file.
 the test *fails* and the captured output is saved to the `.output` file.
 * If the captured output matches the `.expect` file then
 the test *passes* and the `.output` file is removed.
+
+NOTE: If not specified, `Columns` and `Rows` will default to `80` and `25` respectively.
 
 == Licence
 

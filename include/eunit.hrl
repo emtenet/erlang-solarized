@@ -21,9 +21,37 @@
         ?_test(?outputEqual(Expect, Expression, Columns, Rows))).
 
 -define(outputEqualToFile(App, File, Test),
-        solarized_assert:output_equal_to_file((App), (File), (Test))).
+        solarized_assert:output_equal_to_file(
+            (App),
+            (File),
+            (Test),
+            (??Test),
+            [{module, ?MODULE}, {line, ?LINE}])).
+-define(outputEqualToFile(App, File, Test, Comment),
+        solarized_assert:output_equal_to_file(
+            (App),
+            (File),
+            (Test),
+            (??Test),
+            [{module, ?MODULE}, {line, ?LINE}, {comment, (Comment)}])).
 -define(outputEqualToFile(App, File, Test, Columns, Rows),
-        solarized_assert:output_equal_to_file((App), (File), (Test), (Columns), (Rows))).
+        solarized_assert:output_equal_to_file(
+            (App),
+            (File),
+            (Test),
+            (??Test),
+            (Columns),
+            (Rows),
+            [{module, ?MODULE}, {line, ?LINE}])).
+-define(outputEqualToFile(App, File, Test, Columns, Rows, Comment),
+        solarized_assert:output_equal_to_file(
+            (App),
+            (File),
+            (Test),
+            (??Test),
+            (Columns),
+            (Rows),
+            [{module, ?MODULE}, {line, ?LINE}, {comment, (Comment)}])).
 
 -define(result(Expression, Columns, Rows),
         element(1,

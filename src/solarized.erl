@@ -328,7 +328,7 @@ empty_apply_test() ->
 styled_test() ->
     Text = styled_test_colors(),
     Test = fun () -> ok = solarized:styled(Text) end,
-    ?assert(?outputEqualToFile(solarized, styled_test, Test)).
+    ?outputEqualToFile(solarized, styled_test, Test).
 
 styled_test_colors() ->
     Colors =
@@ -1064,7 +1064,7 @@ term_test() ->
         , hanging => false
         },
     Test = fun () ->  solarized:term(Style, Term, Options) end,
-    ?assert(?outputEqualToFile(solarized, term_test, Test, 40, 25)).
+    ?outputEqualToFile(solarized, term_test, Test, 40, 25).
 
 -endif.
 

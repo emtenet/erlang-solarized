@@ -1,0 +1,130 @@
+[38;2;42;161;152m== eunit ======================================================================[0m
+[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m
+
+[38;2;220;50;47m== failure # 1 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 10)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-0-/0[0m (line 10)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 10):
+  [38;2;220;50;47m?assert(_, [0mnot true ( )[38;2;220;50;47m)[0m
+
+[38;2;220;50;47m== failure # 2 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 11)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-2-/0[0m (line 11)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 11):
+  [38;2;220;50;47m?assert(_, [0mnot true ( )[38;2;220;50;47m)[0m
+comment:
+  [38;2;211;54;130m?assert()[0m
+
+[38;2;220;50;47m== failure # 3 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 12)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-4-/0[0m (line 12)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 12):
+  [38;2;220;50;47m?assertNot(_, [0mtrue ( )[38;2;220;50;47m)[0m
+
+[38;2;220;50;47m== failure # 4 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 13)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-6-/0[0m (line 13)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 13):
+  [38;2;220;50;47m?assertNot(_, [0mtrue ( )[38;2;220;50;47m)[0m
+comment:
+  [38;2;211;54;130m?assertNot()[0m
+
+[38;2;220;50;47m== failure # 5 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 14)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-8-/0[0m (line 14)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 14):
+  [38;2;220;50;47m?assertMatch(_, [0mtrue ( )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ _ }[0m
+got:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 6 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 15)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-10-/0[0m (line 15)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 15):
+  [38;2;220;50;47m?assertMatch(_, [0mtrue ( )[38;2;220;50;47m)[0m
+comment:
+  [38;2;211;54;130m?assertMatch()[0m
+pattern:
+  [38;2;133;153;0m{ _ }[0m
+got:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 7 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 16)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-12-/0[0m (line 16)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 16):
+  [38;2;220;50;47m?assertNotMatch(_, [0mtrue ( )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0mtrue[0m
+got:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 8 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 17)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-14-/0[0m (line 17)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 17):
+  [38;2;220;50;47m?assertNotMatch(_, [0mtrue ( )[38;2;220;50;47m)[0m
+comment:
+  [38;2;211;54;130m?assertNotMatch()[0m
+pattern:
+  [38;2;133;153;0mtrue[0m
+got:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 9 ================================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 18)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-16-/0[0m (line 18)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 18):
+  [38;2;220;50;47m?assertEqual(_, [0mtrue ( )[38;2;220;50;47m)[0m
+expected:
+  [38;2;133;153;0mfalse[0m
+got:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 10 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 19)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-18-/0[0m (line 19)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 19):
+  [38;2;220;50;47m?assertEqual(_, [0mtrue ( )[38;2;220;50;47m)[0m
+comment:
+  [38;2;211;54;130m?assertEqual()[0m
+expected:
+  [38;2;133;153;0mfalse[0m
+got:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 11 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 20)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-20-/0[0m (line 20)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 20):
+  [38;2;220;50;47m?assertNotEqual(_, [0mtrue ( )[38;2;220;50;47m)[0m
+NOT expected:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 12 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 21)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-22-/0[0m (line 21)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 21):
+  [38;2;220;50;47m?assertNotEqual(_, [0mtrue ( )[38;2;220;50;47m)[0m
+comment:
+  [38;2;211;54;130m?assertNotEqual()[0m
+NOT expected:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;42;161;152m== eunit ======================================================================[0m
+[38;2;220;50;47m12 tests, 12 failures
+[0m

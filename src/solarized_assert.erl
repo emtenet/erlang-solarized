@@ -3,8 +3,8 @@
 %% See LICENSE for licensing information.
 -module(solarized_assert).
 
--export([ output_equal_to_file/3
-        , output_equal_to_file/5
+-export([ output_equal_to_file/5
+        , output_equal_to_file/7
         ]).
 
 -ifdef(TEST).
@@ -13,53 +13,77 @@
 
 %=======================================================================
 
--spec output_equal_to_file(App, File, Test) -> boolean()
+-spec output_equal_to_file(App, File, Test, TestName, Props) -> ok
     when
       App :: atom(),
       File :: file:name_all(),
-      Test :: fun(() -> Result),
-      Result :: term().
+      Test :: fun(() -> TestResult),
+      TestName :: string(),
+      TestResult :: term(),
+      Props :: list({module, atom()} | {line, integer()}).
 
-output_equal_to_file(App, File, Test)
+output_equal_to_file(App, File, Test, TestName, Props0)
         when is_atom(App) andalso
-             is_function(Test, 0) ->
-    Output = solarized_capture:output(Test),
-    check_equal_to_file(App, File, Output).
+             (is_atom(File) orelse is_list(File)) andalso
+             is_function(Test, 0) andalso
+             is_list(TestName) andalso
+             is_list(Props0) ->
+    output_equal_to_file(App, File, Test, TestName, 80, 25, Props0).
 
 %=======================================================================
 
--spec output_equal_to_file(App, File, Test, Columns, Rows) -> boolean()
+-spec output_equal_to_file(App, File, Test, TestName, Columns, Rows, Props)
+    -> ok
     when
       App :: atom(),
       File :: file:name_all(),
-      Test :: fun(() -> Result),
+      Test :: fun(() -> TestResult),
+      TestName :: string(),
+      TestResult :: term(),
       Columns :: solarized_capture:geometry(),
       Rows :: solarized_capture:geometry(),
-      Result :: term().
+      Props :: list({module, atom()} | {line, integer()}).
 
-output_equal_to_file(App, File, Test, Columns, Rows)
+output_equal_to_file(App, File, Test, TestName, Columns, Rows, Props0)
         when is_atom(App) andalso
-             is_function(Test, 0) ->
+             (is_atom(File) orelse is_list(File)) andalso
+             is_function(Test, 0) andalso
+             is_list(TestName) andalso
+             is_integer(Columns) andalso
+             is_integer(Rows) andalso
+             is_list(Props0) ->
     Output = solarized_capture:output(Test, Columns, Rows),
-    check_equal_to_file(App, File, Output).
+    FileName = case is_atom(File) of
+        true ->
+            atom_to_list(File);
+
+        false ->
+            File
+    end,
+    Props =
+        [ {app, atom_to_list(App)}
+        , {file, FileName}
+        , {expression, TestName}
+        , {columns, integer_to_list(Columns)}
+        , {rows, integer_to_list(Rows)}
+        | Props0
+        ],
+    check_equal_to_file(App, File, Output, Props).
 
 %=======================================================================
 
-check_equal_to_file(App, File, Output) ->
+check_equal_to_file(App, File, Output, Props0) ->
     BaseDir = code:lib_dir(App, test),
     ok = ensure_test_dir(BaseDir),
     BaseFile = filename:join(BaseDir, File),
     ExpectFile = [BaseFile, ".expect"],
     OutputFile = [BaseFile, ".output"],
-    case equal_to_file(Output, ExpectFile) of
-        true ->
-            ok = delete_output_file(OutputFile),
-            true;
-
-        false ->
-            ok = file:write_file(OutputFile, Output, [binary]),
-            false
-    end.
+    Props =
+        [ {expect_file, ExpectFile}
+        , {output_file, OutputFile}
+        | Props0
+        ],
+    equal_to_file(Output, OutputFile, ExpectFile, Props).
 
 %=======================================================================
 
@@ -74,17 +98,31 @@ ensure_test_dir(TestDir) ->
 
 %-----------------------------------------------------------------------
 
-equal_to_file(Output, ExpectFile) ->
+equal_to_file(Output, OutputFile, ExpectFile, Props) ->
     case file:read_file(ExpectFile) of
         {ok, Expect} when Expect =:= Output ->
-            true;
+            ok = delete_output_file(OutputFile),
+            ok;
 
         {ok, _} ->
-            false;
+            not_equal_to_file(Output, OutputFile, ExpectFile, Props);
 
         {error, enoent} ->
-            false
+            not_equal_to_file(Output, OutputFile, ExpectFile, Props)
     end.
+
+%-----------------------------------------------------------------------
+
+-spec not_equal_to_file(binary(), string(), string(), list()) -> no_return().
+
+not_equal_to_file(Output, OutputFile, ExpectFile, Props) ->
+    ok = file:write_file(OutputFile, Output, [binary]),
+    erlang:error(
+        { outputEqualToFile
+        , [ {expect_file, ExpectFile}
+          , {output_file, OutputFile}
+          | Props
+          ]}).
 
 %-----------------------------------------------------------------------
 
