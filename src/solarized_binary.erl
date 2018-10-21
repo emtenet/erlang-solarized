@@ -39,8 +39,12 @@
 %=======================================================================
 
 diffed(<<>>, <<>>) ->
-    Empty = {scalar, same, 4, <<"<<>>">>},
+    Empty = sized(same, <<>>),
     {Empty, Empty};
+diffed(Old = <<>>, New) ->
+    {sized(diff, Old), sized(diff, New)};
+diffed(Old, New = <<>>) ->
+    {sized(diff, Old), sized(diff, New)};
 diffed(Old, New) ->
     {O, N} = solarized_binary_diff:diff(Old, New),
     Same = case size(Old) =:= size(New) of
@@ -50,6 +54,21 @@ diffed(Old, New) ->
     { {binary, Same, sized(Old), O}
     , {binary, Same, sized(New), N}
     }.
+
+%=======================================================================
+
+-ifdef(TEST).
+
+diffed_against_empty_test_() ->
+    Empty = <<>>,
+    Other = <<"other">>,
+    EmptyDiffed = {scalar, diff, 4, <<"<<>>">>},
+    OtherDiffed = {binary, diff, 6 + size(Other), [<<>>, Other]},
+    [ ?_assertEqual({EmptyDiffed, OtherDiffed}, diffed(Empty, Other))
+    , ?_assertEqual({OtherDiffed, EmptyDiffed}, diffed(Other, Empty))
+    ].
+
+-endif.
 
 %=======================================================================
 
