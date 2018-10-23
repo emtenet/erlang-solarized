@@ -1,5 +1,5 @@
 [38;2;42;161;152m== eunit ======================================================================[0m
-[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m
+[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m[38;2;220;50;47mF[0m
 
 [38;2;220;50;47m== failure # 1 ================================================================[0m
   [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 10)
@@ -125,6 +125,206 @@ comment:
 NOT expected:
   [38;2;203;75;22mtrue[0m
 
+[38;2;220;50;47m== failure # 13 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 22)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-24-/0[0m (line 22)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 22):
+  [38;2;220;50;47m?assertException(_, _, [0mtrue ( )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected success:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 14 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 23)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-26-/0[0m (line 23)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 23):
+  [38;2;220;50;47m?assertException(_, _, [0merror ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{error, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-26-/0[0m (line 23)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 15 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 24)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-28-/0[0m (line 24)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 24):
+  [38;2;220;50;47m?assertException(_, _, [0mexit ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{exit, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-28-/0[0m (line 24)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 16 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 25)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-30-/0[0m (line 25)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 25):
+  [38;2;220;50;47m?assertException(_, _, [0mthrow ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{throw, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-30-/0[0m (line 25)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 17 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 26)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-32-/0[0m (line 26)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 26):
+  [38;2;220;50;47m?assertException(_, _, [0mtrue ( )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected success:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 18 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 27)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-34-/0[0m (line 27)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 27):
+  [38;2;220;50;47m?assertException(_, _, [0merror ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{error, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-34-/0[0m (line 27)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 19 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 28)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-36-/0[0m (line 28)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 28):
+  [38;2;220;50;47m?assertException(_, _, [0mexit ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{exit, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-36-/0[0m (line 28)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 20 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 29)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-38-/0[0m (line 29)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 29):
+  [38;2;220;50;47m?assertException(_, _, [0mthrow ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ error , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{throw, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-38-/0[0m (line 29)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 21 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 30)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-40-/0[0m (line 30)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 30):
+  [38;2;220;50;47m?assertException(_, _, [0mtrue ( )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ exit , expect , [...] }[0m
+unexpected success:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 22 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 31)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-42-/0[0m (line 31)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 31):
+  [38;2;220;50;47m?assertException(_, _, [0merror ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ exit , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{error, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-42-/0[0m (line 31)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 23 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 32)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-44-/0[0m (line 32)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 32):
+  [38;2;220;50;47m?assertException(_, _, [0mexit ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ exit , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{exit, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-44-/0[0m (line 32)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 24 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 33)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-46-/0[0m (line 33)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 33):
+  [38;2;220;50;47m?assertException(_, _, [0mthrow ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ exit , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{throw, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-46-/0[0m (line 33)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 25 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 34)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-48-/0[0m (line 34)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 34):
+  [38;2;220;50;47m?assertException(_, _, [0mtrue ( )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ throw , expect , [...] }[0m
+unexpected success:
+  [38;2;203;75;22mtrue[0m
+
+[38;2;220;50;47m== failure # 26 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 35)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-50-/0[0m (line 35)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 35):
+  [38;2;220;50;47m?assertException(_, _, [0merror ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ throw , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{error, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-50-/0[0m (line 35)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 27 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 36)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-52-/0[0m (line 36)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 36):
+  [38;2;220;50;47m?assertException(_, _, [0mexit ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ throw , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{exit, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-52-/0[0m (line 36)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
+[38;2;220;50;47m== failure # 28 ===============================================================[0m
+  [38;2;38;139;210massert_macros_test:assert_macros/0[0m (line 37)
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-54-/0[0m (line 37)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+assertion in [38;2;38;139;210massert_macros_test[0m (line 37):
+  [38;2;220;50;47m?assertException(_, _, [0mthrow ( unexpected )[38;2;220;50;47m)[0m
+pattern:
+  [38;2;133;153;0m{ throw , expect , [...] }[0m
+unexpected exception:
+  [38;2;203;75;22m{throw, unexpected, '_'}[0m
+  [38;2;38;139;210massert_macros_test:-assert_macros/0-fun-54-/0[0m (line 37)
+    [38;2;88;110;117mtest/assert_macros_test.erl[0m
+
 [38;2;42;161;152m== eunit ======================================================================[0m
-[38;2;220;50;47m12 tests, 12 failures
+[38;2;220;50;47m28 tests, 28 failures
 [0m

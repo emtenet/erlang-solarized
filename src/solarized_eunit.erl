@@ -304,31 +304,34 @@ report_failed(Id, Count, Tests) ->
 %=======================================================================
 
 report_exception({Class, Reason, Stack}) ->
-    report_exception_stack(Class, Reason, <<>>, lists:reverse(Stack)).
+    report_exception_stack(lists:reverse(Stack)),
+    report_exception_class(Class, Reason).
 
 %-----------------------------------------------------------------------
 
 report_exception({Class, Reason, Stack}, Output) ->
-    report_exception_stack(Class, Reason, Output, lists:reverse(Stack)).
+    report_exception_stack(lists:reverse(Stack)),
+    report_exception_output(Output),
+    report_exception_class(Class, Reason).
 
 %-----------------------------------------------------------------------
 
-report_exception_stack(Class, Reason, Output, [{M, _, _, _} | Stack])
+report_exception_stack([{M, _, _, _} | Stack])
         when M =:= eunit_proc orelse
              M =:= eunit_test ->
     % skip stack references to eunit
-    report_exception_stack(Class, Reason, Output, Stack);
-report_exception_stack(Class, Reason, Output, [{M, F, A, Loc} | Stack])
+    report_exception_stack(Stack);
+report_exception_stack([{M, F, A, Loc} | Stack])
         when is_integer(A) ->
     report_exception_stack_item(M, F, A, Loc),
-    report_exception_stack(Class, Reason, Output, Stack);
-report_exception_stack(Class, Reason, Output, [{M, F, A, Loc} | Stack]) ->
+    report_exception_stack(Stack);
+report_exception_stack([{M, F, A, Loc} | Stack]) ->
     report_exception_stack_item(M, F, length(A), Loc),
     solarized:text(<<"called with:\n">>),
     solarized:term(cyan, A, #{ indent => 2 }),
-    report_exception_stack(Class, Reason, Output, Stack);
-report_exception_stack(Class, Reason, Output, []) ->
-    report_exception_output(Class, Reason, Output).
+    report_exception_stack(Stack);
+report_exception_stack([]) ->
+    ok.
 
 %-----------------------------------------------------------------------
 
@@ -339,16 +342,15 @@ report_exception_stack_item(M, F, A, Loc) ->
 
 %-----------------------------------------------------------------------
 
-report_exception_output(Class, Reason, <<>>) ->
-    report_exception_class(Class, Reason);
-report_exception_output(Class, Reason, []) ->
-    report_exception_class(Class, Reason);
-report_exception_output(Class, Reason, [<<>>]) ->
-    report_exception_class(Class, Reason);
-report_exception_output(Class, Reason, Output) ->
+report_exception_output(<<>>) ->
+    ok;
+report_exception_output([]) ->
+    ok;
+report_exception_output([<<>>]) ->
+    ok;
+report_exception_output(Output) ->
     solarized:text(<<"output:\n">>),
-    solarized:term(text, Output, #{ indent => 2 }),
-    report_exception_class(Class, Reason).
+    solarized:term(text, Output, #{ indent => 2 }).
 
 %-----------------------------------------------------------------------
 
@@ -393,6 +395,18 @@ report_exception_error({assertNotMatch, Props}) when is_list(Props) ->
     report_assertion(assertNotMatch, ['_', expression], Props),
     report_property_string(<<"pattern">>, green, pattern, Props),
     report_property(<<"got">>, orange, value, Props);
+report_exception_error({assertException, Props}) when is_list(Props) ->
+    report_assertion(assertException, ['_', '_', expression], Props),
+    report_property_string(<<"pattern">>, green, pattern, Props),
+    case proplists:lookup(unexpected_exception, Props) of
+        none ->
+            report_property(<<"unexpected success">>, orange, unexpected_success, Props);
+
+        {_, {Class, Reason, Stack}} ->
+            report_header(<<"unexpected exception">>),
+            report_term(orange, {Class, Reason, '_'}),
+            report_exception_stack(lists:reverse(Stack))
+    end;
 report_exception_error({badmatch, Value}) ->
     report_header(<<"bad match">>),
     solarized:term(orange, Value, #{ indent => 2 });
