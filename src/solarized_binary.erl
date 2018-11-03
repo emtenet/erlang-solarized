@@ -197,8 +197,12 @@ inline_string(Start, Stop, Parts, Same, Acc, string) ->
 
 %-----------------------------------------------------------------------
 
+inline_string(Start, <<>>, [], Same, Acc) ->
+    [<<"\">>">>, {Same, Start} | Acc];
 inline_string(Start, [], [], Same, Acc) ->
     [<<"\">>">>, {Same, Start} | Acc];
+inline_string(Start, <<>>, Parts, Same, Acc) ->
+    inline(<<>>, Parts, Same, [{Same, Start} | Acc], string);
 inline_string(Start, [], Parts, Same, Acc) ->
     inline(<<>>, Parts, Same, [{Same, Start} | Acc], string);
 inline_string(Start, Binary = <<C, Rest/binary>>, Parts, Same, Acc)
@@ -342,6 +346,9 @@ styled_string_next(W, Start, _, Rest, Line, Lines) ->
 
 %-----------------------------------------------------------------------
 
+styled_string_rest(W, Start, <<>>, Line, Lines) ->
+    Line1 = styled_text(Start, Line, Lines),
+    styled_part(W, Line1, Lines, string);
 styled_string_rest(W, Start, [], Line, Lines) ->
     Line1 = styled_text(Start, Line, Lines),
     styled_part(W, Line1, Lines, string);
@@ -575,6 +582,20 @@ inline_3_test_() ->
     [ ?_assertEqual(Sized, sized(Same, Binary))
     , ?_assertEqual(Inline, inline(Parts))
     , ?_assertEqual(Styled, styled(10, Parts))
+    ].
+
+%-----------------------------------------------------------------------
+
+inline_utf8_test_() ->
+    Binary = <<16#2028/utf8>>,
+    Same = same,
+    Parts = [Binary],
+    Sized = {binary, Same, 7, Parts},
+    Inline = [<<"\">>">>, {same, Binary}, <<"<<\"">>],
+    Styled = [<<">>">>, newline, [<<"\"">>, {same, Binary}, <<"<<\"">>]],
+    [ ?_assertEqual(Sized, sized(Same, Binary))
+    , ?_assertEqual(Inline, inline(Parts))
+    , ?_assertEqual(Styled, styled(40, Parts))
     ].
 
 %-----------------------------------------------------------------------
