@@ -322,7 +322,8 @@ report_exception({Class, Reason, Stack}, Output) ->
 
 report_exception_stack([{M, _, _, _} | Stack])
         when M =:= eunit_proc orelse
-             M =:= eunit_test ->
+             M =:= eunit_test orelse
+             M =:= test_server ->
     % skip stack references to eunit
     report_exception_stack(Stack);
 report_exception_stack([{M, F, A, Loc} | Stack])
@@ -414,6 +415,9 @@ report_exception_error({assertException, Props}) when is_list(Props) ->
 report_exception_error({badmatch, Value}) ->
     report_header(<<"bad match">>),
     solarized:term(orange, Value, #{ indent => 2 });
+report_exception_error({thrown, Thrown}) ->
+    report_header(<<"thrown">>),
+    solarized:term(orange, Thrown, #{ indent => 2 });
 report_exception_error(Reason) ->
     report_header(<<"error">>),
     solarized:term(orange, Reason, #{ indent => 2 }).
