@@ -28,6 +28,10 @@
         , terminate/2
         ]).
 
+%% helpers used by solarized_ct
+-export([report_exception_error/1]).
+-export([report_exception_stack/1]).
+
 start(Options) ->
     eunit_listener:start(?MODULE, Options).
 

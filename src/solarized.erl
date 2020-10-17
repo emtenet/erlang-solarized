@@ -104,7 +104,7 @@
 styled(Text) ->
     Styled = styled(?NO_STYLE, [], Text),
     Output = styled_style(Styled, ?NO_STYLE),
-    io:put_chars(Output).
+    io:put_chars(user, Output).
 
 %-----------------------------------------------------------------------
 
