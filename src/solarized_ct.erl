@@ -178,6 +178,13 @@ print_testcase(Suite, TestCase, Label, #state{groups = [Group | _]}) ->
 
 %%--------------------------------------------------------------------
 
+print_reason({{badmatch, {aborted, {Error, Stack1}}}, Stack2})
+        when is_tuple(Error) andalso
+             is_list(Stack1) andalso
+             is_list(Stack2) ->
+    solarized_eunit:report_exception_stack(lists:reverse(Stack1)),
+    solarized_eunit:report_exception_stack(lists:reverse(Stack2)),
+    solarized_eunit:report_exception_error(Error);
 print_reason({Error, Stack}) when is_tuple(Error) andalso is_list(Stack) ->
     solarized_eunit:report_exception_stack(lists:reverse(Stack)),
     solarized_eunit:report_exception_error(Error);
