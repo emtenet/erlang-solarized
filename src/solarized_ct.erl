@@ -26,7 +26,7 @@
     id :: term(),
     suite = undefined :: atom(),
     groups = [] :: list(atom()),
-    sasl :: term()
+    application_controller :: term()
 }).
 
 %%====================================================================
@@ -34,9 +34,9 @@
 %%====================================================================
 
 init(Id, _Options) ->
-    SASL = application:get_env(sasl, sasl_error_logger),
-    application:set_env(sasl, sasl_error_logger, false),
-    {ok, #state{id = Id, sasl = SASL}}.
+    Level = logger:get_module_level(application_controller),
+    ok = logger:set_module_level(application_controller, none),
+    {ok, #state{id = Id, application_controller = Level}}.
 
 %%--------------------------------------------------------------------
 
@@ -141,12 +141,9 @@ on_tc_skip(Suite, TestCase, Reason, State) ->
 %%--------------------------------------------------------------------
 
 terminate(State) ->
-    case State#state.sasl of
-        {ok, Value} ->
-            application:set_env(sasl, sasl_error_logger, Value);
-
-        undefined ->
-            application:unset_env(sasl, sasl_error_logger)
+    case State#state.application_controller of
+        [{_, Level}] ->
+            ok = logger:set_module_level(application_controller, Level)
     end,
     ok.
 
