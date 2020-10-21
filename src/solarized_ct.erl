@@ -25,7 +25,8 @@
 -record(state, {
     id :: term(),
     suite = undefined :: atom(),
-    groups = [] :: list(atom())
+    groups = [] :: list(atom()),
+    sasl :: term()
 }).
 
 %%====================================================================
@@ -33,7 +34,9 @@
 %%====================================================================
 
 init(Id, _Options) ->
-    {ok, #state{id = Id}}.
+    SASL = application:get_env(sasl, sasl_error_logger),
+    application:set_env(sasl, sasl_error_logger, false),
+    {ok, #state{id = Id, sasl = SASL}}.
 
 %%--------------------------------------------------------------------
 
@@ -137,7 +140,14 @@ on_tc_skip(Suite, TestCase, Reason, State) ->
 
 %%--------------------------------------------------------------------
 
-terminate(_State) ->
+terminate(State) ->
+    case State#state.sasl of
+        {ok, Value} ->
+            application:set_env(sasl, sasl_error_logger, Value);
+
+        undefined ->
+            application:unset_env(sasl, sasl_error_logger)
+    end,
     ok.
 
 %%====================================================================
