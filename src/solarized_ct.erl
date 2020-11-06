@@ -152,7 +152,7 @@ terminate(State) ->
 %%====================================================================
 
 print_testcase(Suite, TestCase, Label, #state{groups = []}) ->
-    solarized:styled([
+    solarized:styled_io(user, [
         atom_to_binary(Suite, utf8),
         <<" => ">>,
         atom_to_binary(TestCase, utf8),
@@ -161,7 +161,7 @@ print_testcase(Suite, TestCase, Label, #state{groups = []}) ->
         <<".\n">>
     ]);
 print_testcase(Suite, TestCase, Label, #state{groups = [Group]}) ->
-    solarized:styled([
+    solarized:styled_io(user, [
         atom_to_binary(Suite, utf8),
         <<" => ">>,
         atom_to_binary(Group, utf8),
@@ -172,7 +172,7 @@ print_testcase(Suite, TestCase, Label, #state{groups = [Group]}) ->
         <<".\n">>
     ]);
 print_testcase(Suite, TestCase, Label, #state{groups = [Group | _]}) ->
-    solarized:styled([
+    solarized:styled_io(user, [
         atom_to_binary(Suite, utf8),
         <<" => ...">>,
         atom_to_binary(Group, utf8),
@@ -186,7 +186,7 @@ print_testcase(Suite, TestCase, Label, #state{groups = [Group | _]}) ->
 %%--------------------------------------------------------------------
 
 print_reason({{badmatch, {aborted, {Error, Stack1}}}, Stack2})
-        when is_tuple(Error) andalso
+        when (is_atom(Error) orelse is_tuple(Error)) andalso
              is_list(Stack1) andalso
              is_list(Stack2) ->
     solarized_eunit:report_exception_stack(lists:reverse(Stack1)),
