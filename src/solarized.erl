@@ -4,6 +4,7 @@
 -module(solarized).
 
 -export([ styled/1
+        , styled_io/2
         , text/1, text/2, text/3
         , comment/1, comment/2, comment/3
         , emphasize/1, emphasize/2, emphasize/3
@@ -104,7 +105,18 @@
 styled(Text) ->
     Styled = styled(?NO_STYLE, [], Text),
     Output = styled_style(Styled, ?NO_STYLE),
-    io:put_chars(user, Output).
+    io:put_chars(Output).
+
+%-----------------------------------------------------------------------
+
+-spec solarized:styled_io(io:device(), Text) -> ok
+    when
+      Text :: solarized:styled().
+
+styled_io(Io, Text) ->
+    Styled = styled(?NO_STYLE, [], Text),
+    Output = styled_style(Styled, ?NO_STYLE),
+    io:put_chars(Io, Output).
 
 %-----------------------------------------------------------------------
 

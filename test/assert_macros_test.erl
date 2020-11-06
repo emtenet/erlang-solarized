@@ -4,7 +4,7 @@
 -module(assert_macros_test).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("solarized/include/eunit.hrl").
+-include("eunit.hrl").
 
 assert_macros() ->
     [ ?_test(?assert(not true()))
