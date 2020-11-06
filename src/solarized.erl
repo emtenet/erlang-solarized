@@ -3,27 +3,29 @@
 %% See LICENSE for licensing information.
 -module(solarized).
 
--export([ styled/1
-        , styled_io/2
-        , text/1, text/2, text/3
-        , comment/1, comment/2, comment/3
-        , emphasize/1, emphasize/2, emphasize/3
-        , blue/1, blue/2, blue/3
-        , cyan/1, cyan/2, cyan/3
-        , green/1, green/2, green/3
-        , magenta/1, magenta/2, magenta/3
-        , orange/1, orange/2, orange/3
-        , red/1, red/2, red/3
-        , violet/1, violet/2, violet/3
-        , yellow/1, yellow/2, yellow/3
-        , title/2
-        , section/2
-        , term/2, term/3
-        , diff/4, diff/5
-        , columns/0
-        , rows/0
-        , nl/0
-        ]).
+-include("styled.hrl").
+
+-export([styled/1, styled/2]).
+
+-export ?STYLED_EXPORT(text).
+-export ?STYLED_EXPORT(comment).
+-export ?STYLED_EXPORT(emphasize).
+-export ?STYLED_EXPORT(blue).
+-export ?STYLED_EXPORT(cyan).
+-export ?STYLED_EXPORT(green).
+-export ?STYLED_EXPORT(magenta).
+-export ?STYLED_EXPORT(orange).
+-export ?STYLED_EXPORT(red).
+-export ?STYLED_EXPORT(violet).
+-export ?STYLED_EXPORT(yellow).
+
+-export([title/2, title/3]).
+-export([section/2, section/3]).
+-export([term/2, term/3, term/4]).
+-export([diff/4, diff/5]).
+-export([columns/0, columns/1]).
+-export([rows/0, rows/1]).
+-export([nl/0, nl/1]).
 
 -export_type([ color/0
              , directive/0
@@ -96,8 +98,6 @@
 
 %=======================================================================
 
--include("styled.hrl").
-
 -spec solarized:styled(Text) -> ok
     when
       Text :: solarized:styled().
@@ -109,11 +109,11 @@ styled(Text) ->
 
 %-----------------------------------------------------------------------
 
--spec solarized:styled_io(io:device(), Text) -> ok
+-spec solarized:styled(pid(), Text) -> ok
     when
       Text :: solarized:styled().
 
-styled_io(Io, Text) ->
+styled(Io, Text) when is_pid(Io) ->
     Styled = styled(?NO_STYLE, [], Text),
     Output = styled_style(Styled, ?NO_STYLE),
     io:put_chars(Io, Output).
@@ -384,39 +384,17 @@ styled_test_underline() ->
 
 %=======================================================================
 
--spec text(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(text).
+?STYLED_FUNC_1(text).
 
-text(Text) ->
-    styled({text, Text}).
+-spec ?STYLED_SPEC_2(text).
+?STYLED_FUNC_2(text).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(text).
+?STYLED_FUNC_3(text).
 
--spec text(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;   (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-text(Apply, Text) when is_atom(Apply) ->
-    styled({text, Apply, Text});
-text(Format, Data) ->
-    styled({text, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec text(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-text(Apply, Format, Data) when is_atom(Apply) ->
-    styled({text, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(text).
+?STYLED_FUNC_4(text).
 
 %-----------------------------------------------------------------------
 
@@ -435,39 +413,17 @@ text_test_() ->
 
 %=======================================================================
 
--spec comment(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(comment).
+?STYLED_FUNC_1(comment).
 
-comment(Text) ->
-    styled({comment, Text}).
+-spec ?STYLED_SPEC_2(comment).
+?STYLED_FUNC_2(comment).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(comment).
+?STYLED_FUNC_3(comment).
 
--spec comment(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;      (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-comment(Apply, Text) when is_atom(Apply) ->
-    styled({comment, Apply, Text});
-comment(Format, Data) ->
-    styled({comment, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec comment(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-comment(Apply, Format, Data) when is_atom(Apply) ->
-    styled({comment, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(comment).
+?STYLED_FUNC_4(comment).
 
 %-----------------------------------------------------------------------
 
@@ -486,39 +442,17 @@ comment_test_() ->
 
 %=======================================================================
 
--spec emphasize(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(emphasize).
+?STYLED_FUNC_1(emphasize).
 
-emphasize(Text) ->
-    styled({emphasize, Text}).
+-spec ?STYLED_SPEC_2(emphasize).
+?STYLED_FUNC_2(emphasize).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(emphasize).
+?STYLED_FUNC_3(emphasize).
 
--spec emphasize(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;        (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-emphasize(Apply, Text) when is_atom(Apply) ->
-    styled({emphasize, Apply, Text});
-emphasize(Format, Data) ->
-    styled({emphasize, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec emphasize(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-emphasize(Apply, Format, Data) when is_atom(Apply) ->
-    styled({emphasize, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(emphasize).
+?STYLED_FUNC_4(emphasize).
 
 %-----------------------------------------------------------------------
 
@@ -537,39 +471,17 @@ emphasize_test_() ->
 
 %=======================================================================
 
--spec blue(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(blue).
+?STYLED_FUNC_1(blue).
 
-blue(Text) ->
-    styled({blue, Text}).
+-spec ?STYLED_SPEC_2(blue).
+?STYLED_FUNC_2(blue).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(blue).
+?STYLED_FUNC_3(blue).
 
--spec blue(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;   (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-blue(Apply, Text) when is_atom(Apply) ->
-    styled({blue, Apply, Text});
-blue(Format, Data) ->
-    styled({blue, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec blue(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-blue(Apply, Format, Data) when is_atom(Apply) ->
-    styled({blue, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(blue).
+?STYLED_FUNC_4(blue).
 
 %-----------------------------------------------------------------------
 
@@ -588,39 +500,17 @@ blue_test_() ->
 
 %=======================================================================
 
--spec cyan(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(cyan).
+?STYLED_FUNC_1(cyan).
 
-cyan(Text) ->
-    styled({cyan, Text}).
+-spec ?STYLED_SPEC_2(cyan).
+?STYLED_FUNC_2(cyan).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(cyan).
+?STYLED_FUNC_3(cyan).
 
--spec cyan(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;   (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-cyan(Apply, Text) when is_atom(Apply) ->
-    styled({cyan, Apply, Text});
-cyan(Format, Data) ->
-    styled({cyan, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec cyan(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-cyan(Apply, Format, Data) when is_atom(Apply) ->
-    styled({cyan, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(cyan).
+?STYLED_FUNC_4(cyan).
 
 %-----------------------------------------------------------------------
 
@@ -639,39 +529,17 @@ cyan_test_() ->
 
 %=======================================================================
 
--spec green(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(green).
+?STYLED_FUNC_1(green).
 
-green(Text) ->
-    styled({green, Text}).
+-spec ?STYLED_SPEC_2(green).
+?STYLED_FUNC_2(green).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(green).
+?STYLED_FUNC_3(green).
 
--spec green(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;    (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-green(Apply, Text) when is_atom(Apply) ->
-    styled({green, Apply, Text});
-green(Format, Data) ->
-    styled({green, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec green(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-green(Apply, Format, Data) when is_atom(Apply) ->
-    styled({green, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(green).
+?STYLED_FUNC_4(green).
 
 %-----------------------------------------------------------------------
 
@@ -690,39 +558,17 @@ green_test_() ->
 
 %=======================================================================
 
--spec magenta(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(magenta).
+?STYLED_FUNC_1(magenta).
 
-magenta(Text) ->
-    styled({magenta, Text}).
+-spec ?STYLED_SPEC_2(magenta).
+?STYLED_FUNC_2(magenta).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(magenta).
+?STYLED_FUNC_3(magenta).
 
--spec magenta(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;      (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-magenta(Apply, Text) when is_atom(Apply) ->
-    styled({magenta, Apply, Text});
-magenta(Format, Data) ->
-    styled({magenta, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec magenta(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-magenta(Apply, Format, Data) when is_atom(Apply) ->
-    styled({magenta, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(magenta).
+?STYLED_FUNC_4(magenta).
 
 %-----------------------------------------------------------------------
 
@@ -741,39 +587,17 @@ magenta_test_() ->
 
 %=======================================================================
 
--spec orange(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(orange).
+?STYLED_FUNC_1(orange).
 
-orange(Text) ->
-    styled({orange, Text}).
+-spec ?STYLED_SPEC_2(orange).
+?STYLED_FUNC_2(orange).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(orange).
+?STYLED_FUNC_3(orange).
 
--spec orange(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;     (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-orange(Apply, Text) when is_atom(Apply) ->
-    styled({orange, Apply, Text});
-orange(Format, Data) ->
-    styled({orange, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec orange(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-orange(Apply, Format, Data) when is_atom(Apply) ->
-    styled({orange, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(orange).
+?STYLED_FUNC_4(orange).
 
 %-----------------------------------------------------------------------
 
@@ -792,39 +616,17 @@ orange_test_() ->
 
 %=======================================================================
 
--spec red(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(red).
+?STYLED_FUNC_1(red).
 
-red(Text) ->
-    styled({red, Text}).
+-spec ?STYLED_SPEC_2(red).
+?STYLED_FUNC_2(red).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(red).
+?STYLED_FUNC_3(red).
 
--spec red(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;  (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-red(Apply, Text) when is_atom(Apply) ->
-    styled({red, Apply, Text});
-red(Format, Data) ->
-    styled({red, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec red(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-red(Apply, Format, Data) when is_atom(Apply) ->
-    styled({red, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(red).
+?STYLED_FUNC_4(red).
 
 %-----------------------------------------------------------------------
 
@@ -843,39 +645,17 @@ red_test_() ->
 
 %=======================================================================
 
--spec violet(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(violet).
+?STYLED_FUNC_1(violet).
 
-violet(Text) ->
-    styled({violet, Text}).
+-spec ?STYLED_SPEC_2(violet).
+?STYLED_FUNC_2(violet).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(violet).
+?STYLED_FUNC_3(violet).
 
--spec violet(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;     (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-violet(Apply, Text) when is_atom(Apply) ->
-    styled({violet, Apply, Text});
-violet(Format, Data) ->
-    styled({violet, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec violet(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-violet(Apply, Format, Data) when is_atom(Apply) ->
-    styled({violet, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(violet).
+?STYLED_FUNC_4(violet).
 
 %-----------------------------------------------------------------------
 
@@ -894,39 +674,17 @@ violet_test_() ->
 
 %=======================================================================
 
--spec yellow(Text) -> ok
-    when
-      Text :: unicode:chardata().
+-spec ?STYLED_SPEC_1(yellow).
+?STYLED_FUNC_1(yellow).
 
-yellow(Text) ->
-    styled({yellow, Text}).
+-spec ?STYLED_SPEC_2(yellow).
+?STYLED_FUNC_2(yellow).
 
-%-----------------------------------------------------------------------
+-spec ?STYLED_SPEC_3(yellow).
+?STYLED_FUNC_3(yellow).
 
--spec yellow(Format, Data) -> ok
-    when
-      Format :: format(),
-      Data :: [term()]
-      ;     (Apply, Text) -> ok
-    when
-      Apply :: solarized:directive(),
-      Text :: unicode:chardata().
-
-yellow(Apply, Text) when is_atom(Apply) ->
-    styled({yellow, Apply, Text});
-yellow(Format, Data) ->
-    styled({yellow, io_lib:format(Format, Data)}).
-
-%-----------------------------------------------------------------------
-
--spec yellow(Apply, Format, Data) -> ok
-    when
-      Apply :: solarized:directive(),
-      Format :: format(),
-      Data :: [term()].
-
-yellow(Apply, Format, Data) when is_atom(Apply) ->
-    styled({yellow, Apply, io_lib:format(Format, Data)}).
+-spec ?STYLED_SPEC_4(yellow).
+?STYLED_FUNC_4(yellow).
 
 %-----------------------------------------------------------------------
 
@@ -962,6 +720,26 @@ title(Style, Text) when is_binary(Text) ->
     end;
 title(Color, Text) ->
     title(Color, unicode:characters_to_binary(Text)).
+
+%-----------------------------------------------------------------------
+
+-spec solarized:title(pid(), Style, Text) -> ok
+    when
+      Style :: application(),
+      Text :: unicode:chardata().
+
+title(Io, Style, Text) when is_binary(Text) ->
+    Repeat = columns(Io) - 5 - erlang:size(Text),
+    Line = io_lib:format("== ~s ~*..*s", [Text, Repeat, $=, <<>>]),
+    case Style of
+        Apply when is_atom(Apply) ->
+            styled(Io, [{Apply, Line}, $\n]);
+
+        {Apply1, Apply2} ->
+            styled(Io, [{Apply1, Apply2, Line}, $\n])
+    end;
+title(Io, Color, Text) ->
+    title(Io, Color, unicode:characters_to_binary(Text)).
 
 %-----------------------------------------------------------------------
 
@@ -1012,6 +790,26 @@ section(Color, Text) ->
 
 %-----------------------------------------------------------------------
 
+-spec solarized:section(pid(), Style, Text) -> ok
+    when
+      Style :: application(),
+      Text :: unicode:chardata().
+
+section(Io, Style, Text) when is_binary(Text) ->
+    Repeat = columns(Io) - 5 - erlang:size(Text),
+    Line = io_lib:format("-- ~s ~*..*s", [Text, Repeat, $-, <<>>]),
+    case Style of
+        Apply when is_atom(Apply) ->
+            styled(Io, [{Apply, Line}, $\n]);
+
+        {Apply1, Apply2} ->
+            styled(Io, [{Apply1, Apply2, Line}, $\n])
+    end;
+section(Io, Color, Text) ->
+    section(Io, Color, unicode:characters_to_binary(Text)).
+
+%-----------------------------------------------------------------------
+
 -ifdef(TEST).
 
 section_test_() ->
@@ -1047,16 +845,33 @@ section_test_() ->
 term(Style, Term) ->
     styled(solarized_diff:term(Style, Term, #{})).
 
-%=======================================================================
+%-----------------------------------------------------------------------
 
 -spec solarized:term(Style, Term, Options) -> ok
     when
       Style :: application(),
       Term :: term(),
-      Options :: solarized_diff:options().
+      Options :: solarized_diff:options();
+                    (pid(), Style, Term) -> ok
+    when
+      Style :: application(),
+      Term :: term().
 
+term(Io, Style, Term) when is_pid(Io) ->
+    styled(Io, solarized_diff:term(Style, Term, #{}));
 term(Style, Term, Options) ->
     styled(solarized_diff:term(Style, Term, Options)).
+
+%-----------------------------------------------------------------------
+
+-spec solarized:term(pid(), Style, Term, Options) -> ok
+    when
+      Style :: application(),
+      Term :: term(),
+      Options :: solarized_diff:options().
+
+term(Io, Style, Term, Options) when is_pid(Io) ->
+    styled(Io, solarized_diff:term(Style, Term, Options)).
 
 %-----------------------------------------------------------------------
 
@@ -1122,6 +937,23 @@ columns() ->
             80
     end.
 
+%-----------------------------------------------------------------------
+
+-spec solarized:columns(pid()) -> Columns
+    when
+      Columns :: pos_integer().
+
+columns(Io) when is_pid(Io) ->
+    case io:columns(Io) of
+        {ok, Columns} when is_integer(Columns) andalso Columns > 0 ->
+            Columns;
+
+        _ ->
+            80
+    end.
+
+%-----------------------------------------------------------------------
+
 -ifdef(TEST).
 
 columns_test_() ->
@@ -1146,6 +978,23 @@ rows() ->
             25
     end.
 
+%-----------------------------------------------------------------------
+
+-spec solarized:rows(pid()) -> Rows
+    when
+      Rows :: pos_integer().
+
+rows(Io) when is_pid(Io) ->
+    case io:rows(Io) of
+        {ok, Rows} when is_integer(Rows) andalso Rows > 0 ->
+            Rows;
+
+        _ ->
+            25
+    end.
+
+%-----------------------------------------------------------------------
+
 -ifdef(TEST).
 
 rows_test_() ->
@@ -1161,6 +1010,15 @@ rows_test_() ->
 
 nl() ->
     io:nl().
+
+%-----------------------------------------------------------------------
+
+-spec solarized:nl(pid()) -> ok.
+
+nl(Io) when is_pid(Io) ->
+    io:nl(Io).
+
+%-----------------------------------------------------------------------
 
 -ifdef(TEST).
 

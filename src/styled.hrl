@@ -59,3 +59,89 @@
 -define(UNDERLINE, "4").
 -define(UNDERLINE_OFF, "24").
 
+%=======================================================================
+
+-define(STYLED_EXPORT(Name),
+    ([Name/1, Name/2, Name/3, Name/4])
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_SPEC_1(Name), Name
+    (Text) -> ok
+        when Text :: unicode:chardata()
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_FUNC_1(Name),
+    Name(Text) ->
+        styled({Name, Text})
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_SPEC_2(Name), Name
+    (Format, Data) -> ok
+        when Format :: format(),
+             Data :: [term()];
+    (Apply, Text) -> ok
+        when Apply :: solarized:directive(),
+             Text :: unicode:chardata();
+    (pid(), Text) -> ok
+        when Text :: unicode:chardata()
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_FUNC_2(Name),
+    Name(Io, Text) when is_pid(Io) ->
+        styled(Io, {Name, Text});
+    Name(Apply, Text) when is_atom(Apply) ->
+        styled({Name, Apply, Text});
+    Name(Format, Data) ->
+        styled({Name, io_lib:format(Format, Data)})
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_SPEC_3(Name), Name
+    (Apply, Format, Data) -> ok
+        when Apply :: solarized:directive(),
+             Format :: format(),
+             Data :: [term()];
+    (pid(), Format, Data) -> ok
+        when Format :: format(),
+             Data :: [term()];
+    (pid(), Apply, Text) -> ok
+        when Apply :: solarized:directive(),
+             Text :: unicode:chardata()
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_FUNC_3(Name),
+    Name(Io, Apply, Text) when is_pid(Io) andalso is_atom(Apply) ->
+        styled({Name, Apply, Text});
+    Name(Io, Format, Data) when is_pid(Io) ->
+        styled({Name, io_lib:format(Format, Data)});
+    Name(Apply, Format, Data) when is_atom(Apply) ->
+        styled({Name, Apply, io_lib:format(Format, Data)})
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_SPEC_4(Name), Name
+    (pid(), Apply, Format, Data) -> ok
+        when Apply :: solarized:directive(),
+             Format :: format(),
+             Data :: [term()]
+).
+
+%-----------------------------------------------------------------------
+
+-define(STYLED_FUNC_4(Name),
+    Name(Io, Apply, Format, Data) when is_pid(Io) andalso is_atom(Apply) ->
+        styled(Io, {Name, Apply, io_lib:format(Format, Data)})
+).
+

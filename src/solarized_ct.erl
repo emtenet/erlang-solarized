@@ -26,7 +26,8 @@
     id :: term(),
     suite = undefined :: atom(),
     groups = [] :: list(atom()),
-    application_controller :: term()
+    application_controller :: term(),
+    io :: pid()
 }).
 
 %%====================================================================
@@ -36,7 +37,15 @@
 init(Id, _Options) ->
     Level = logger:get_module_level(application_controller),
     ok = logger:set_module_level(application_controller, none),
-    {ok, #state{id = Id, application_controller = Level}}.
+    {ok, #state{id = Id, application_controller = Level, io = user_io()}}.
+
+%%--------------------------------------------------------------------
+
+user_io() ->
+    case whereis(user) of
+        Io when is_pid(Io) ->
+            Io
+    end.
 
 %%--------------------------------------------------------------------
 
@@ -106,7 +115,7 @@ post_end_per_testcase(Suite, TestCase, Config, Error, State) ->
             %% Test case passed, but we still ended in an error
             Label = <<"end_per_testcase FAILED">>,
             print_testcase(Suite, TestCase, {magenta, Label}, State),
-            print_reason(Error);
+            print_reason(Error, State);
 
         _ ->
             %% Test case failed, in which case on_tc_fail already reports it
@@ -119,23 +128,23 @@ post_end_per_testcase(Suite, TestCase, Config, Error, State) ->
 on_tc_fail({TestCase, _Group}, Reason, State) ->
     Suite = State#state.suite,
     print_testcase(Suite, TestCase, {red, bold, <<"FAILED">>}, State),
-    print_reason(Reason),
+    print_reason(Reason, State),
     State;
 on_tc_fail(TestCase, Reason, State) ->
     Suite = State#state.suite,
     print_testcase(Suite, TestCase, {red, bold, <<"FAILED">>}, State),
-    print_reason(Reason),
+    print_reason(Reason, State),
     State.
 
 %%--------------------------------------------------------------------
 
 on_tc_skip(Suite, {TestCase, _Group}, Reason, State) ->
     print_testcase(Suite, TestCase, {magenta, <<"SKIPPED">>}, State),
-    print_reason(Reason),
+    print_reason(Reason, State),
     State#state{suite = Suite};
 on_tc_skip(Suite, TestCase, Reason, State) ->
     print_testcase(Suite, TestCase, {magenta, <<"SKIPPED">>}, State),
-    print_reason(Reason),
+    print_reason(Reason, State),
     State#state{suite = Suite}.
 
 %%--------------------------------------------------------------------
@@ -151,8 +160,8 @@ terminate(State) ->
 %% display
 %%====================================================================
 
-print_testcase(Suite, TestCase, Label, #state{groups = []}) ->
-    solarized:styled_io(user, [
+print_testcase(Suite, TestCase, Label, #state{groups = [], io = Io}) ->
+    solarized:styled_io(Io, [
         atom_to_binary(Suite, utf8),
         <<" => ">>,
         atom_to_binary(TestCase, utf8),
@@ -160,8 +169,8 @@ print_testcase(Suite, TestCase, Label, #state{groups = []}) ->
         Label,
         <<".\n">>
     ]);
-print_testcase(Suite, TestCase, Label, #state{groups = [Group]}) ->
-    solarized:styled_io(user, [
+print_testcase(Suite, TestCase, Label, #state{groups = [Group], io = Io}) ->
+    solarized:styled_io(Io, [
         atom_to_binary(Suite, utf8),
         <<" => ">>,
         atom_to_binary(Group, utf8),
@@ -171,8 +180,8 @@ print_testcase(Suite, TestCase, Label, #state{groups = [Group]}) ->
         Label,
         <<".\n">>
     ]);
-print_testcase(Suite, TestCase, Label, #state{groups = [Group | _]}) ->
-    solarized:styled_io(user, [
+print_testcase(Suite, TestCase, Label, #state{groups = [Group | _], io = Io}) ->
+    solarized:styled_io(Io, [
         atom_to_binary(Suite, utf8),
         <<" => ...">>,
         atom_to_binary(Group, utf8),
@@ -185,15 +194,17 @@ print_testcase(Suite, TestCase, Label, #state{groups = [Group | _]}) ->
 
 %%--------------------------------------------------------------------
 
-print_reason({{badmatch, {aborted, {Error, Stack1}}}, Stack2})
+print_reason({{badmatch, {aborted, {Error, Stack1}}}, Stack2}, #state{io = Io})
         when (is_atom(Error) orelse is_tuple(Error)) andalso
              is_list(Stack1) andalso
              is_list(Stack2) ->
-    solarized_eunit:report_exception_stack(lists:reverse(Stack1)),
-    solarized_eunit:report_exception_error(Error);
-print_reason({Error, Stack}) when is_tuple(Error) andalso is_list(Stack) ->
-    solarized_eunit:report_exception_stack(lists:reverse(Stack)),
-    solarized_eunit:report_exception_error(Error);
-print_reason(Reason) ->
-    solarized_eunit:report_exception_error(Reason).
+    solarized_eunit:report_exception_stack(Io, lists:reverse(Stack1)),
+    solarized_eunit:report_exception_error(Io, Error);
+print_reason({Error, Stack}, #state{io = Io})
+        when is_tuple(Error) andalso
+             is_list(Stack) ->
+    solarized_eunit:report_exception_stack(Io, lists:reverse(Stack)),
+    solarized_eunit:report_exception_error(Io, Error);
+print_reason(Reason, #state{io = Io}) ->
+    solarized_eunit:report_exception_error(Io, Reason).
 

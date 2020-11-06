@@ -29,8 +29,8 @@
         ]).
 
 %% helpers used by solarized_ct
--export([report_exception_error/1]).
--export([report_exception_stack/1]).
+-export([report_exception_error/2]).
+-export([report_exception_stack/2]).
 
 start(Options) ->
     eunit_listener:start(?MODULE, Options).
@@ -308,42 +308,42 @@ report_failed(Id, Count, Tests) ->
 %=======================================================================
 
 report_exception({Class, Reason, Stack}) ->
-    report_exception_stack(lists:reverse(Stack)),
+    report_exception_stack(group_leader(), lists:reverse(Stack)),
     report_exception_class(Class, Reason).
 
 %-----------------------------------------------------------------------
 
 report_exception({Class, Reason, Stack}, Output) ->
-    report_exception_stack(lists:reverse(Stack)),
+    report_exception_stack(group_leader(), lists:reverse(Stack)),
     report_exception_output(Output),
     report_exception_class(Class, Reason).
 
 %-----------------------------------------------------------------------
 
-report_exception_stack([{M, _, _, _} | Stack])
+report_exception_stack(Io, [{M, _, _, _} | Stack])
         when M =:= eunit_proc orelse
              M =:= eunit_test orelse
              M =:= test_server ->
     % skip stack references to eunit
-    report_exception_stack(Stack);
-report_exception_stack([{M, F, A, Loc} | Stack])
+    report_exception_stack(Io, Stack);
+report_exception_stack(Io, [{M, F, A, Loc} | Stack])
         when is_integer(A) ->
-    report_exception_stack_item(M, F, A, Loc),
-    report_exception_stack(Stack);
-report_exception_stack([{M, F, A, Loc} | Stack]) ->
-    report_exception_stack_item(M, F, length(A), Loc),
-    solarized:text(<<"called with:\n">>),
-    solarized:term(cyan, A, #{ indent => 2 }),
-    report_exception_stack(Stack);
-report_exception_stack([]) ->
+    report_exception_stack_item(Io, M, F, A, Loc),
+    report_exception_stack(Io, Stack);
+report_exception_stack(Io, [{M, F, A, Loc} | Stack]) ->
+    report_exception_stack_item(Io, M, F, length(A), Loc),
+    solarized:text(Io, <<"called with:\n">>),
+    solarized:term(Io, cyan, A, #{ indent => 2 }),
+    report_exception_stack(Io, Stack);
+report_exception_stack(_, []) ->
     ok.
 
 %-----------------------------------------------------------------------
 
-report_exception_stack_item(M, F, A, Loc) ->
+report_exception_stack_item(Io, M, F, A, Loc) ->
     Line = proplists:get_value(line, Loc),
     File = proplists:get_value(file, Loc),
-    report_function(M, F, A, Line, File, comment).
+    report_function(Io, M, F, A, Line, File, comment).
 
 %-----------------------------------------------------------------------
 
@@ -360,7 +360,7 @@ report_exception_output(Output) ->
 %-----------------------------------------------------------------------
 
 report_exception_class(error, Reason) ->
-    report_exception_error(Reason);
+    report_exception_error(group_leader(), Reason);
 report_exception_class(throw, Reason) ->
     solarized:text(<<"throw:\n">>),
     solarized:term(orange, Reason, #{ indent => 2 });
@@ -370,61 +370,61 @@ report_exception_class(exit, Reason) ->
 
 %-----------------------------------------------------------------------
 
-report_exception_error({outputEqualToFile, Props}) when is_list(Props) ->
+report_exception_error(Io, {outputEqualToFile, Props}) when is_list(Props) ->
     Args = [app, file, expression, columns, rows],
-    report_assertion(outputEqualToFile, Args, Props),
-    report_property_string(<<"expect file">>, green, expect_file, Props),
-    report_property_string(<<"output file">>, orange, output_file, Props);
-report_exception_error({assert, Props}) when is_list(Props) ->
+    report_assertion(Io, outputEqualToFile, Args, Props),
+    report_property_string(Io, <<"expect file">>, green, expect_file, Props),
+    report_property_string(Io, <<"output file">>, orange, output_file, Props);
+report_exception_error(Io, {assert, Props}) when is_list(Props) ->
     case proplists:lookup(expected, Props) of
         {_, true} ->
-            report_assertion(assert, ['_', expression], Props);
+            report_assertion(Io, assert, ['_', expression], Props);
 
         {_, false} ->
-            report_assertion(assertNot, ['_', expression], Props)
+            report_assertion(Io, assertNot, ['_', expression], Props)
     end,
-    report_property_optional(<<"not boolean">>, orange, not_boolean, Props);
-report_exception_error({assertEqual, Props}) when is_list(Props) ->
-    report_assertion(assertEqual, ['_', expression], Props),
-    {E, G} = report_diff(expected, value, Props),
-    report_diffed(<<"expected">>, E),
-    report_diffed(<<"got">>, G);
-report_exception_error({assertNotEqual, Props}) when is_list(Props) ->
-    report_assertion(assertNotEqual, ['_', expression], Props),
-    report_property(<<"NOT expected">>, orange, value, Props);
-report_exception_error({assertMatch, Props}) when is_list(Props) ->
-    report_assertion(assertMatch, ['_', expression], Props),
-    report_property_string(<<"pattern">>, green, pattern, Props),
-    report_property(<<"got">>, orange, value, Props);
-report_exception_error({assertNotMatch, Props}) when is_list(Props) ->
-    report_assertion(assertNotMatch, ['_', expression], Props),
-    report_property_string(<<"pattern">>, green, pattern, Props),
-    report_property(<<"got">>, orange, value, Props);
-report_exception_error({assertException, Props}) when is_list(Props) ->
-    report_assertion(assertException, ['_', '_', expression], Props),
-    report_property_string(<<"pattern">>, green, pattern, Props),
+    report_property_optional(Io, <<"not boolean">>, orange, not_boolean, Props);
+report_exception_error(Io, {assertEqual, Props}) when is_list(Props) ->
+    report_assertion(Io, assertEqual, ['_', expression], Props),
+    {E, G} = report_diff(Io, expected, value, Props),
+    report_diffed(Io, <<"expected">>, E),
+    report_diffed(Io, <<"got">>, G);
+report_exception_error(Io, {assertNotEqual, Props}) when is_list(Props) ->
+    report_assertion(Io, assertNotEqual, ['_', expression], Props),
+    report_property(Io, <<"NOT expected">>, orange, value, Props);
+report_exception_error(Io, {assertMatch, Props}) when is_list(Props) ->
+    report_assertion(Io, assertMatch, ['_', expression], Props),
+    report_property_string(Io, <<"pattern">>, green, pattern, Props),
+    report_property(Io, <<"got">>, orange, value, Props);
+report_exception_error(Io, {assertNotMatch, Props}) when is_list(Props) ->
+    report_assertion(Io, assertNotMatch, ['_', expression], Props),
+    report_property_string(Io, <<"pattern">>, green, pattern, Props),
+    report_property(Io, <<"got">>, orange, value, Props);
+report_exception_error(Io, {assertException, Props}) when is_list(Props) ->
+    report_assertion(Io, assertException, ['_', '_', expression], Props),
+    report_property_string(Io, <<"pattern">>, green, pattern, Props),
     case proplists:lookup(unexpected_exception, Props) of
         none ->
-            report_property(<<"unexpected success">>, orange, unexpected_success, Props);
+            report_property(Io, <<"unexpected success">>, orange, unexpected_success, Props);
 
         {_, {Class, Reason, Stack}} ->
-            report_header(<<"unexpected exception">>),
-            report_term(orange, {Class, Reason, '_'}),
-            report_exception_stack(lists:reverse(Stack))
+            report_header(Io, <<"unexpected exception">>),
+            report_term(Io, orange, {Class, Reason, '_'}),
+            report_exception_stack(Io, lists:reverse(Stack))
     end;
-report_exception_error({badmatch, Value}) ->
-    report_header(<<"bad match">>),
-    solarized:term(orange, Value, #{ indent => 2 });
-report_exception_error({thrown, Thrown}) ->
-    report_header(<<"thrown">>),
-    solarized:term(orange, Thrown, #{ indent => 2 });
-report_exception_error(Reason) ->
-    report_header(<<"error">>),
-    solarized:term(orange, Reason, #{ indent => 2 }).
+report_exception_error(Io, {badmatch, Value}) ->
+    report_header(Io, <<"bad match">>),
+    solarized:term(Io, orange, Value, #{ indent => 2 });
+report_exception_error(Io, {thrown, Thrown}) ->
+    report_header(Io, <<"thrown">>),
+    solarized:term(Io, orange, Thrown, #{ indent => 2 });
+report_exception_error(Io, Reason) ->
+    report_header(Io, <<"error">>),
+    solarized:term(Io, orange, Reason, #{ indent => 2 }).
 
 %-----------------------------------------------------------------------
 
-report_diff(Left, Right, Props) ->
+report_diff(Io, Left, Right, Props) ->
     case {proplists:lookup(Left, Props), proplists:lookup(Right, Props)} of
         {none, none} ->
             {{missing, Left}, {missing, Right}};
@@ -446,59 +446,59 @@ report_diff(Left, Right, Props) ->
                 {{diffed, Ld}, {diffed, Rd}}
             catch
                 Class:Reason:Stack ->
-                    solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
-                    io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
-                    solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+                    solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
+                    io:format(Io, "exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+                    solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
                     {{missing, Left}, {missing, Right}}
             end
     end.
 
 %-----------------------------------------------------------------------
 
-report_diffed(Header, Diffed) ->
-    report_header(Header),
+report_diffed(Io, Header, Diffed) ->
+    report_header(Io, Header),
     case Diffed of
         {diffed, Styled} ->
-            report_styled(Styled);
+            report_styled(Io, Styled);
 
         {term, Style, Term} ->
-            report_term(Style, Term);
+            report_term(Io, Style, Term);
 
         {missing, Key} ->
-            report_string(red, [$? | atom_to_list(Key)])
+            report_string(Io, red, [$? | atom_to_list(Key)])
     end.
 
 %-----------------------------------------------------------------------
 
-report_property(Header, Style, Key, Props) ->
-    report_header(Header),
+report_property(Io, Header, Style, Key, Props) ->
+    report_header(Io, Header),
     case proplists:lookup(Key, Props) of
         {_, Value} ->
-            report_term(Style, Value);
+            report_term(Io, Style, Value);
 
         none ->
-            report_string(red, [$? | atom_to_list(Key)])
+            report_string(Io, red, [$? | atom_to_list(Key)])
     end.
 
 %-----------------------------------------------------------------------
 
-report_property_string(Header, Style, Key, Props) ->
-    report_header(Header),
+report_property_string(Io, Header, Style, Key, Props) ->
+    report_header(Io, Header),
     case proplists:lookup(Key, Props) of
         {_, Value} ->
-            report_string(Style, Value);
+            report_string(Io, Style, Value);
 
         none ->
-            report_string(red, [$? | atom_to_list(Key)])
+            report_string(Io, red, [$? | atom_to_list(Key)])
     end.
 
 %-----------------------------------------------------------------------
 
-report_property_optional(Header, Style, Key, Props) ->
+report_property_optional(Io, Header, Style, Key, Props) ->
     case proplists:lookup(Key, Props) of
         {_, Value} ->
-            report_header(Header),
-            report_term(Style, Value);
+            report_header(Io, Header),
+            report_term(Io, Style, Value);
 
         none ->
             ok
@@ -506,68 +506,68 @@ report_property_optional(Header, Style, Key, Props) ->
 
 %-----------------------------------------------------------------------
 
-report_header(Header) ->
-    solarized:text([ Header, <<":\n">>]).
+report_header(Io, Header) ->
+    solarized:text(Io, [ Header, <<":\n">>]).
 
 %-----------------------------------------------------------------------
 
-report_string(Style, String) ->
-    report_styled([<<"  ">>, {Style, String}, <<"\n">>]).
+report_string(Io, Style, String) ->
+    report_styled(Io, [<<"  ">>, {Style, String}, <<"\n">>]).
 
 %-----------------------------------------------------------------------
 
-report_styled(Styled) ->
+report_styled(Io, Styled) ->
     try
-        solarized:styled(Styled)
+        solarized:styled(Io, Styled)
     catch
         Class:Reason:Stack ->
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
-            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
-            io:format("--- styled ---~n~p~n", [Styled]),
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format(Io, "exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            io:format(Io, "--- styled ---~n~p~n", [Styled]),
+            solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
             ok
     end.
 
 %-----------------------------------------------------------------------
 
-report_term(Style, Term) ->
+report_term(Io, Style, Term) ->
     try
-        solarized:term(Style, Term, #{ indent => 2 })
+        solarized:term(Io, Style, Term, #{ indent => 2 })
     catch
         Class:Reason:Stack ->
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
-            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
-            io:format("--- term ---~n~p~n", [Term]),
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format(Io, "exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            io:format(Io, "--- term ---~n~p~n", [Term]),
+            solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
             ok
     end.
 
 %=======================================================================
 
-report_assertion(Assertion, Args, Props) ->
+report_assertion(Io, Assertion, Args, Props) ->
     try
-        report_assertion_header(Props),
+        report_assertion_header(Io, Props),
         Styled =
             [ <<"  ">>
             , {red, [$?, atom_to_list(Assertion), $(]}
             | report_assertion_args(Args, Props)
             ],
-        solarized:styled(Styled),
-        report_assertion_comment(Props)
+        solarized:styled(Io, Styled),
+        report_assertion_comment(Io, Props)
     catch
         Class:Reason:Stack ->
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
-            io:format("exception ~p:~p~n~p~n", [Class, Reason, Stack]),
-            solarized:title(magenta, <<"solarized_eunit EXCEPTION">>),
+            solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
+            io:format(Io, "exception ~p:~p~n~p~n", [Class, Reason, Stack]),
+            solarized:title(Io, magenta, <<"solarized_eunit EXCEPTION">>),
             ok
     end.
 
 %-----------------------------------------------------------------------
 
-report_assertion_header(Props) ->
+report_assertion_header(Io, Props) ->
     Rest = report_assertion_module(Props),
     Styled = [<<"assertion">> | Rest],
-    solarized:styled(Styled).
+    solarized:styled(Io, Styled).
 
 %-----------------------------------------------------------------------
 
@@ -615,23 +615,23 @@ report_assertion_arg(Arg, Rest, Props) ->
 
 %-----------------------------------------------------------------------
 
-report_assertion_comment(Props) ->
+report_assertion_comment(Io, Props) ->
     case proplists:lookup(comment, Props) of
         none ->
             ok;
 
         {_, Comment} ->
-            solarized:text(<<"comment:\n">>),
+            solarized:text(Io, <<"comment:\n">>),
             case printable(Comment) of
                 true ->
-                    solarized:styled(
+                    solarized:styled(Io,
                         [ <<"  ">>
                         , {magenta, Comment}
                         , <<"\n">>
                         ]);
 
                 false ->
-                    solarized:term(magenta, Comment, #{ indent => 2 })
+                    solarized:term(Io, magenta, Comment, #{ indent => 2 })
             end
     end.
 
@@ -688,39 +688,39 @@ report_group_description(_) ->
 report_test_function(Test = #{ source := {M, F, A} }) ->
     L = maps:get(line, Test, undefined),
     D = maps:get(desc, Test, undefined),
-    report_function(M, F, A, L, D, magenta).
+    report_function(group_leader(), M, F, A, L, D, magenta).
 
 %=======================================================================
 
-report_function(M, F, A, Line, Extra, ExtraColor) ->
-    W = solarized:columns(),
+report_function(Io, M, F, A, Line, Extra, ExtraColor) ->
+    W = solarized:columns(Io),
     Func = io_lib:format("~ts:~ts/~p", [M, F, A]),
     Length = string:length(Func),
-    solarized:styled([<<"  ">>, {blue, Func}]),
-    report_function_line(W, 2 + Length, Line, Extra, ExtraColor).
+    solarized:styled(Io, [<<"  ">>, {blue, Func}]),
+    report_function_line(Io, W, 2 + Length, Line, Extra, ExtraColor).
 
-report_function_line(W, C, undefined, Extra, ExtraColor) ->
-    report_function_extra(W, C, Extra, ExtraColor);
-report_function_line(W, C, L, Extra, ExtraColor) ->
+report_function_line(Io, W, C, undefined, Extra, ExtraColor) ->
+    report_function_extra(Io, W, C, Extra, ExtraColor);
+report_function_line(Io, W, C, L, Extra, ExtraColor) ->
     Line = io_lib:format("(line ~p)", [L]),
     Length = string:length(Line),
     if C + 1 + Length < W ->
-        solarized:text([$\s, Line]),
-        report_function_extra(W, C + 1 + Length, Extra, ExtraColor);
+        solarized:text(Io, [$\s, Line]),
+        report_function_extra(Io, W, C + 1 + Length, Extra, ExtraColor);
 
        true ->
-        solarized:text([<<"\n    ">>, Line]),
-        report_function_extra(W, 4 + Length, Extra, ExtraColor)
+        solarized:text(Io, [<<"\n    ">>, Line]),
+        report_function_extra(Io, W, 4 + Length, Extra, ExtraColor)
     end.
 
-report_function_extra(_, _, undefined, _) ->
-    solarized:nl();
-report_function_extra(W, C, Extra, Color) ->
+report_function_extra(Io, _, _, undefined, _) ->
+    solarized:nl(Io);
+report_function_extra(Io, W, C, Extra, Color) ->
     Length = string:length(Extra),
     if C + 1 + Length < W ->
-        solarized:styled([$\s, {Color, Extra}, $\n]);
+        solarized:styled(Io, [$\s, {Color, Extra}, $\n]);
 
        true ->
-        solarized:styled([<<"\n    ">>, {Color, Extra}, $\n])
+        solarized:styled(Io, [<<"\n    ">>, {Color, Extra}, $\n])
     end.
 
