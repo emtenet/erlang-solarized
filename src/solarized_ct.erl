@@ -161,7 +161,7 @@ terminate(State) ->
 %%====================================================================
 
 print_testcase(Suite, TestCase, Label, #state{groups = [], io = Io}) ->
-    solarized:styled_io(Io, [
+    solarized:styled(Io, [
         atom_to_binary(Suite, utf8),
         <<" => ">>,
         atom_to_binary(TestCase, utf8),
@@ -170,7 +170,7 @@ print_testcase(Suite, TestCase, Label, #state{groups = [], io = Io}) ->
         <<".\n">>
     ]);
 print_testcase(Suite, TestCase, Label, #state{groups = [Group], io = Io}) ->
-    solarized:styled_io(Io, [
+    solarized:styled(Io, [
         atom_to_binary(Suite, utf8),
         <<" => ">>,
         atom_to_binary(Group, utf8),
@@ -181,7 +181,7 @@ print_testcase(Suite, TestCase, Label, #state{groups = [Group], io = Io}) ->
         <<".\n">>
     ]);
 print_testcase(Suite, TestCase, Label, #state{groups = [Group | _], io = Io}) ->
-    solarized:styled_io(Io, [
+    solarized:styled(Io, [
         atom_to_binary(Suite, utf8),
         <<" => ...">>,
         atom_to_binary(Group, utf8),
