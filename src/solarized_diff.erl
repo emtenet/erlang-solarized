@@ -390,6 +390,16 @@ map_diffed([], [], Same, OldAcc, NewAcc) ->
     { map_end(Same, OldAcc)
     , map_end(Same, NewAcc)
     };
+map_diffed(Olds = [], [{Nk, Nv} | Ns], _, Oa, Na) ->
+    K = sized(diff, Nk),
+    V = sized(diff, Nv),
+    N = pair_end(K, V),
+    map_diffed(Olds, Ns, diff, Oa, map_item(N, Na));
+map_diffed([{Ok, Ov} | Os], News = [], _, Oa, Na) ->
+    K = sized(diff, Ok),
+    V = sized(diff, Ov),
+    O = pair_end(K, V),
+    map_diffed(Os, News, diff, map_item(O, Oa), Na);
 map_diffed(Olds = [{Ok, Ov} | Os], News = [{Nk, Nv} | Ns], Same, Oa, Na) ->
     case Ok of
         Nk ->
@@ -849,7 +859,13 @@ map_diffed_test_() ->
             }
           ]
         },
-    ?_assertEqual({OldDiffed, NewDiffed}, diffed(Old, New)).
+    [ {"forward"
+      , ?_assertEqual({OldDiffed, NewDiffed}, diffed(Old, New))
+      }
+    , {"backward"
+      , ?_assertEqual({NewDiffed, OldDiffed}, diffed(New, Old))
+      }
+    ].
 
 %-----------------------------------------------------------------------
 
@@ -865,6 +881,35 @@ map_empty_diffed_test_() ->
           ]
         },
     NewDiffed = {scalar, diff, 2, <<"#{}">>},
+    [ {"forward"
+      , ?_assertEqual({OldDiffed, NewDiffed}, diffed(Old, New))
+      }
+    , {"backward"
+      , ?_assertEqual({NewDiffed, OldDiffed}, diffed(New, Old))
+      }
+    ].
+
+%-----------------------------------------------------------------------
+
+map_diff_2_test_() ->
+    Old = #{duplicate => email},
+    New = #{ok => true},
+    OldDiffed =
+        {map, diff, 21
+        , [ {pair, 18
+            , {scalar, diff, 9, <<"duplicate">>}
+            , {scalar, diff, 5, <<"email">>}
+            }
+          ]
+        },
+    NewDiffed =
+        {map, diff, 13
+        , [ {pair, 10
+            , {scalar, diff, 2, <<"ok">>}
+            , {scalar, diff, 4, <<"true">>}
+            }
+          ]
+        },
     [ {"forward"
       , ?_assertEqual({OldDiffed, NewDiffed}, diffed(Old, New))
       }
