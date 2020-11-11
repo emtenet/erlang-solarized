@@ -433,8 +433,8 @@ map_sized(Same, Map) ->
 map_sized(Same, [], Acc) ->
     map_end(Same, Acc);
 map_sized(Same, [{Key, Value} | Pairs], Acc) ->
-    K = sized(diff, Key),
-    V = sized(diff, Value),
+    K = sized(Same, Key),
+    V = sized(Same, Value),
     P = pair_end(K, V),
     map_sized(Same, Pairs, map_item(P, Acc)).
 
@@ -777,6 +777,31 @@ list_empty_diffed_test_() ->
           ]
         },
     NewDiffed = {scalar, diff, 2, <<"[]">>},
+    [ {"forward"
+      , ?_assertEqual({OldDiffed, NewDiffed}, diffed(Old, New))
+      }
+    , {"backward"
+      , ?_assertEqual({NewDiffed, OldDiffed}, diffed(New, Old))
+      }
+    ].
+
+%-----------------------------------------------------------------------
+
+list_map_diffed_test_() ->
+    Old = [#{key => value}],
+    New = Old,
+    OldDiffed =
+        {list, same, 17
+        , [ {map, same, 15
+            , [ {pair, 12
+                , {scalar, same, 3, <<"key">>}
+                , {scalar, same, 5, <<"value">>}
+                }
+              ]
+            }
+          ]
+        },
+    NewDiffed = OldDiffed,
     [ {"forward"
       , ?_assertEqual({OldDiffed, NewDiffed}, diffed(Old, New))
       }
