@@ -96,13 +96,13 @@ sized(<<C, Rest/binary>>, Mode, Max) when ?ESCAPED(C) ->
     sized_string(Rest, Mode, Max, 2);
 sized(Binary, Mode, Max) ->
     case string:next_grapheme(Binary) of
-        [C, Rest] when ?UNICODE(C) ->
+        [C, Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             sized_string(Rest, Mode, Max, 1);
 
-        [C | Rest] when ?UNICODE(C) ->
+        [C | Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             sized_string(Rest, Mode, Max, 1);
 
-        [G | Rest] when is_list(G) ->
+        [G | Rest] when is_list(G) andalso is_binary(Rest) ->
             sized_string(Rest, Mode, Max, 1);
 
         _ ->
@@ -158,13 +158,13 @@ inline(<<C, Rest/binary>>, Parts, Same, Acc, Mode)
     inline_escape(C, Rest, Parts, Same, Acc, Mode);
 inline(Binary, Parts, Same, Acc, Mode) ->
     case string:next_grapheme(Binary) of
-        [C, Rest] when ?UNICODE(C) ->
+        [C, Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             inline_string(Binary, Rest, Parts, Same, Acc, Mode);
 
-        [C | Rest] when ?UNICODE(C) ->
+        [C | Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             inline_string(Binary, Rest, Parts, Same, Acc, Mode);
 
-        [G | Rest] when is_list(G) ->
+        [G | Rest] when is_list(G) andalso is_binary(Rest) ->
             inline_string(Binary, Rest, Parts, Same, Acc, Mode);
 
         _ ->
@@ -212,13 +212,13 @@ inline_string(Start, Binary = <<C, Rest/binary>>, Parts, Same, Acc)
     inline(Rest, Parts, Same, [Escape, String | Acc], string);
 inline_string(Start, Binary, Parts, Same, Acc) ->
     case string:next_grapheme(Binary) of
-        [C, Rest] when ?UNICODE(C) ->
+        [C, Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             inline_string(Start, Rest, Parts, Same, Acc);
 
-        [C | Rest] when ?UNICODE(C) ->
+        [C | Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             inline_string(Start, Rest, Parts, Same, Acc);
 
-        [G | Rest] when is_list(G) ->
+        [G | Rest] when is_list(G) andalso is_binary(Rest) ->
             inline_string(Start, Rest, Parts, Same, Acc);
 
         _ ->
@@ -269,13 +269,13 @@ styled(W, <<C, Rest/binary>>, Line, Lines, Mode)
     styled_escape(W, C, Rest, Line, Lines, Mode);
 styled(W, Binary, Line, Lines, Mode) ->
     case string:next_grapheme(Binary) of
-        [C, Rest] when ?UNICODE(C) ->
+        [C, Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             styled_string(W, Binary, Rest, Line, Lines, Mode);
 
-        [C | Rest] when ?UNICODE(C) ->
+        [C | Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             styled_string(W, Binary, Rest, Line, Lines, Mode);
 
-        [G | Rest] when is_list(G) ->
+        [G | Rest] when is_list(G) andalso is_binary(Rest) ->
             styled_string(W, Binary, Rest, Line, Lines, Mode);
 
         _ ->
@@ -359,13 +359,13 @@ styled_string_rest(W, Start, Binary = <<C, Rest/binary>>, Line, Lines)
     styled_escape(W, C, Rest, Line1, Lines, string);
 styled_string_rest(W, Start, Binary, Line, Lines) ->
     case string:next_grapheme(Binary) of
-        [C, Rest] when ?UNICODE(C) ->
+        [C, Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             styled_string_next(W, Start, Binary, Rest, Line, Lines);
 
-        [C | Rest] when ?UNICODE(C) ->
+        [C | Rest] when ?UNICODE(C) andalso is_binary(Rest) ->
             styled_string_next(W, Start, Binary, Rest, Line, Lines);
 
-        [G | Rest] when is_list(G) ->
+        [G | Rest] when is_list(G) andalso is_binary(Rest) ->
             styled_string_next(W, Start, Binary, Rest, Line, Lines);
 
         _ ->
